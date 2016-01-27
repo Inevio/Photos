@@ -24,68 +24,20 @@
     background: rgba( 0, 0, 0, 0.2 );
 }
 
-.wz-ui-header{
-
-    height: 40px;
-    box-shadow: 0 2px 4px rgba( 0, 0, 0, 0.1), inset 0 1px rgba( 255, 255, 255, 0.15);
-    border-bottom: 1px solid #252525;
-    border-radius: 0;
-
-    background-image: -webkit-linear-gradient( bottom, #2e2e2e, #383838 );
-    background-image: -moz-linear-gradient( bottom, #2e2e2e, #383838 );
-    background-image: -o-linear-gradient( bottom, #2e2e2e, #383838 );
-    background-image: linear-gradient( to top, #2e2e2e, #383838 );
-    float: left;
-    width: 100%;
-}
-
 .wz-view.wz-view-maximized .wz-ui-header{
     box-shadow: 0 2px 4px rgba( 0, 0, 0, 0.1), inset 0 1px rgba( 255, 255, 255, 0.1);
 }
 
-.wz-view-menu-group{
-    height: 23px;
-    padding: 8px 20px;
-    margin-top: 1px;
+.ui-header{
+  border-radius: 3px 3px 0 0;
+  -webkit-border-radius: 3px 3px 0 0;
+  -moz-border-radius: 3px 3px 0 0;
 }
 
-.wz-view-menu-group.right{
-    border-right: none;
-    border-left: 1px solid rgba( 0, 0, 0, 0.2 );
-    box-shadow: -1px 0px 0px rgba( 255, 255, 255, 0.1 );
-}
-
-.weevisor-sidebar-button{
-    display: none;
-    width: 0px;
-    border: none;
-    margin-left: 0px;
-}
-
-.weevisor-sidebar-button i{
-
-    width: 10px;
-    height: 14px;
-    display: block;
-
-    background: url('@static/sprite.png') no-repeat -28px 0;
-    background-size: 57px 15px;
-
-}
-
-.wz-view.sidebar .weevisor-sidebar-button i{
-
-    width: 10px;
-    height: 14px;
-    display: block;
-
-    background: url('@static/sprite.png') no-repeat -38px 0;
-    background-size: 57px 15px;
-
-}
-
-.shown .weevisor-sidebar-button i{
-    background-position: -38px 0;
+.ui-fullscreen i{
+  background: url('@static/fullscreen.png');
+  background-position: 0px 0;
+  background-size: 10px 10px;
 }
 
 .weevisor-zoom-minus i{
@@ -93,7 +45,6 @@
     width: 14px;
     height: 15px;
     display: block;
-
     background: url('@static/sprite.png') no-repeat -14px 0;
     background-size: 57px 15px;
 
@@ -104,7 +55,6 @@
     width: 14px;
     height: 15px;
     display: block;
-
     background: url('@static/sprite.png') no-repeat 0 0;
     background-size: 57px 15px;
 

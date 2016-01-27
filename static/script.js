@@ -3,20 +3,17 @@
     var win     = $( this );
     var minus   = $( '.weevisor-zoom-minus', win );
     var plus    = $( '.weevisor-zoom-plus', win );
-    var sidebar = $( '.weevisor-sidebar', win );
-    var thumb   = $( '.weevisor-sidebar-page.wz-prototype', win );
-    var toggle  = $( '.weevisor-sidebar-button', win );
     var zone    = $( '.weevisor-images', win );
     var zoom    = $( '.weevisor-zoom', win );
-    var uiBarTop= $('.wz-ui-header');
+    var uiBarTop= $('.ui-header');
     var isWebKit          = /webkit/i.test( navigator.userAgent );
     var prevClientX       = 0;
     var prevClientY       = 0;
     var hideControlsTimer = 0;
     var normalWidth       = 0;
     var normalHeight      = 0;
+    var normalScale       = 0;
     var imageLoaded       = null;
-
 
     var menuHeight = $( '.wz-view-menu', win ).outerHeight();
 
@@ -33,24 +30,22 @@
         imageLoaded = file;
 
         $( '<img />')
-            .attr( 'src', file.thumbnails.original )
-            .appendTo( zone )
-            .on( 'load', function(){
-                _marginImage();
-            });
+          .attr( 'src', file.thumbnails.original )
+          .appendTo( zone )
+          .on( 'load', function(){ });
 
-            if( wz.app.storage('horizontal') ){
-                wz.app.storage( 'scale', zone.width() / parseInt( file.metadata.exif.imageWidth, 10 ) );
-            }else{
-                wz.app.storage( 'scale', zone.height() / parseInt( file.metadata.exif.imageHeight, 10 ) );
-            }
+          if( wz.app.storage('horizontal') ){
+            wz.app.storage( 'scale', zone.width() / parseInt( file.metadata.exif.imageWidth, 10 ) );
+          }else{
+            wz.app.storage( 'scale', zone.height() / parseInt( file.metadata.exif.imageHeight, 10 ) );
+          }
 
-            if( wz.app.storage('scale') > 1 ){
-                wz.app.storage('scale', 1 );
-            }
+          if( wz.app.storage('scale') > 1 ){
+            wz.app.storage('scale', 1 );
+          }
 
-            _scaleImage( wz.app.storage('scale') );
-            zoom.val( _preciseDecimal( wz.app.storage('scale') * 100 ) );
+          _scaleImage( wz.app.storage('scale') );
+          zoom.val( _preciseDecimal( wz.app.storage('scale') * 100 ) );
 
     };
 
@@ -66,10 +61,10 @@
             .width( parseInt( scale * wz.app.storage('file').metadata.exif.imageWidth, 10 ) )
             .height( parseInt( scale * wz.app.storage('file').metadata.exif.imageHeight, 10 ) );
 
-        wz.app.storage( 'scale', scale );
-
         _marginImage();
         _detectCursor();
+
+        wz.app.storage( 'scale', scale );
 
     };
 
@@ -84,7 +79,7 @@
 
     var _scaleButton = function( dir ){
 
-        if( wz.app.storage('zoom') === -1 ){
+        if( wz.app.storage('zoom') === -1 || win.hasClass('fullscreen') ){
 
             var i = 0;
             var j = validZoom.length;
@@ -117,7 +112,7 @@
 
             zoom.val( _preciseDecimal( wz.app.storage('scale') * 100 ) );
 
-        }else if( validZoom[ wz.app.storage('zoom') + dir ] ){
+        }else if( validZoom[ wz.app.storage('zoom') + dir ] && !win.hasClass('fullscreen') ){
 
             var newZoom  = wz.app.storage('zoom') + dir;
             var winScale = 0;
@@ -153,105 +148,23 @@
 
     };
 
-    var _detectPage = function(){
-
-        var counter = 0;
-        var images  = $( 'img', zone );
-        var current = images.first();
-
-        $( 'img', zone ).each( function(){
-
-            current = $(this);
-
-            if( ( parseInt( current.position().top, 10 ) + (current.outerHeight( true ) / 2 ) ) > 0 ){
-                return false;
-            }
-
-        });
-
-        var sidebarPages = $( '.weevisor-sidebar-page', sidebar );
-        var tmp          = sidebarPages.filter( '.selected' );
-
-        if( current.index() !== ( tmp.index() - 1 ) ){ // +1/-1 por el prototipo
-
-            tmp.removeClass('selected');
-            console.log(current.index() + 1);
-            tmp = sidebarPages.eq( current.index() + 1 ).addClass('selected');
-
-            sidebar
-                .stop()
-                .clearQueue()
-                .animate( { scrollTop : tmp[ 0 ].offsetTop - parseInt( tmp.css('margin-top'), 10 ) }, 250 );
-
-        }
-
-    };
-
-    var _toggleSidebar = function(){
-
-        if( win.hasClass('sidebar') ){
-
-            sidebar.css( 'display', 'none' );
-            zone.css('width', '+=' + sidebar.width() );
-            win.removeClass('sidebar');
-
-        }else{
-
-            sidebar.css( 'display', 'block' );
-            zone.css('width', '-=' + sidebar.width() );
-            win.addClass('sidebar');
-
-        }
-
-    };
-
     var _detectCursor = function(){
 
         var img = $( 'img', zone );
 
         if( img.height() <= zone.height() && img.width() <= zone.width() ){
-            zone.addClass('hide-hand');
+          zone.addClass('hide-hand');
         }else{
-            zone.removeClass('hide-hand');
+          zone.removeClass('hide-hand');
         }
 
-    };
-
-    var _inversePage = function(){
-        $( '.weevisor-sidebar-page.selected', sidebar ).trigger( 'click', true );
     };
 
 // Events
     win
     .on( 'ui-view-resize ui-view-maximize ui-view-unmaximize', function(){
 
-        if( wz.app.storage('mode') ){
-            _inversePage();
-        }else{
-            _marginImage();
-        }
-
-    });
-
-    sidebar
-    .on( 'click', '.weevisor-sidebar-page', function( e, noAnimate ){
-
-        $(this)
-            .addClass('selected')
-            .siblings('.selected')
-                .removeClass('selected');
-
-        var img = $( 'img', zone ).eq( $(this).index() - 1 );
-
-        zone
-            .stop()
-            .clearQueue();
-
-        if( noAnimate ){
-            zone.scrollTop( img[ 0 ].offsetTop - parseInt( img.css('margin-top') ) );
-        }else{
-            zone.animate( { scrollTop : img[ 0 ].offsetTop - parseInt( img.css('margin-top') ) }, 250 );
-        }
+      _marginImage();
 
     });
 
@@ -347,11 +260,6 @@
 
     });
 
-    toggle
-    .on( 'click', function(){
-        _toggleSidebar();
-    });
-
     zoom
     .on( 'change', function(){
 
@@ -376,79 +284,56 @@
         minus.click();
     });
 
-    if( wz.app.storage('mode') ){
+    zone
+    .on( 'mousewheel', function( e, d, x, y ){
 
-        zone
-        .on( 'mousewheel', function(){
-            _detectPage();
-        });
+      var zoom    = wz.app.storage('zoom');
+      var scrollX = 0;
+      var scrollY = 0;
+      var resize  = ( this.scrollWidth - this.offsetWidth ) || ( this.scrollHeight - this.offsetHeight );
 
-    }else{
+      if( resize || wz.app.storage('zoom') === -1 ){
 
-        zone
-        .on( 'mousewheel', function( e, d, x, y ){
+        /*
+         *
+         * Las siguientes variables se han puesto directamente en la fórmula para no declarar variables que solo se usan una vez
+         *
+         * var posX   = e.clientX - offset.left;
+         * var posY   = e.clientY - offset.top - menuHeight;
+         *
+         * Es la posición del ratón dentro de la zona de la imagen
+         *
+         */
 
-            var zoom    = wz.app.storage('zoom');
-            var scrollX = 0;
-            var scrollY = 0;
-            var resize  = ( this.scrollWidth - this.offsetWidth ) || ( this.scrollHeight - this.offsetHeight );
+        var offset = win.offset();
+        var perX   = ( this.scrollLeft + ( e.clientX - offset.left ) ) / this.scrollWidth;
+        var perY   = ( this.scrollTop + ( e.clientY - offset.top - menuHeight ) ) / this.scrollHeight;
 
-            if( resize || wz.app.storage('zoom') === -1 ){
+      }
 
-                /*
-                 *
-                 * Las siguientes variables se han puesto directamente en la fórmula para no declarar variables que solo se usan una vez
-                 *
-                 * var posX   = e.clientX - offset.left;
-                 * var posY   = e.clientY - offset.top - menuHeight;
-                 *
-                 * Es la posición del ratón dentro de la zona de la imagen
-                 *
-                 */
+      if( y < 0 ){
+        _scaleButton( -1 );
+      }else if( y > 0 ){
+        _scaleButton( 1 );
+      }
 
-                var offset = win.offset();
-                var perX   = ( this.scrollLeft + ( e.clientX - offset.left ) ) / this.scrollWidth;
-                var perY   = ( this.scrollTop + ( e.clientY - offset.top - menuHeight ) ) / this.scrollHeight;
+      // Si no se comprueba el zoom se pueden emular desplazamientos, esto lo previene
+      if( zoom !== wz.app.storage('zoom') ){
 
-            }
+          if( resize || zoom === -1 ){
 
-            if( y < 0 ){
-                _scaleButton( -1 );
-            }else if( y > 0 ){
-                _scaleButton( 1 );
-            }
+            scrollX = ( this.scrollWidth * perX ) - ( this.offsetWidth * perX );
+            scrollY = ( this.scrollHeight * perY ) - ( this.offsetHeight * perY );
 
-            // Si no se comprueba el zoom se pueden emular desplazamientos, esto lo previene
-            if( zoom !== wz.app.storage('zoom') ){
+          }
 
-                if( resize || zoom === -1 ){
+          $(this)
+            .scrollLeft( scrollX )
+            .scrollTop( scrollY );
 
-                    scrollX = ( this.scrollWidth * perX ) - ( this.offsetWidth * perX );
-                    scrollY = ( this.scrollHeight * perY ) - ( this.offsetHeight * perY );
+      }
 
-                }
-
-                $(this)
-                    .scrollLeft( scrollX )
-                    .scrollTop( scrollY );
-
-            }
-
-        });
-
-    }
-
-// Start load
-if( location.host.indexOf('file') === -1 ){
-
-  win.deskitemX( parseInt( ( wz.tool.desktopWidth() - win.width() ) / 2, 10 ) );
-  win.deskitemY( parseInt( ( wz.tool.desktopHeight() - win.height() ) / 2, 10 ) );
-
-}else{
-  wz.app.maximizeView( win );
-}
-
-_loadImage( wz.app.storage('file') );
+    });
 
 /* fullscreen mode */
 var toggleFullscreen = function(){
@@ -456,7 +341,6 @@ var toggleFullscreen = function(){
     if( win.hasClass( 'fullscreen' ) ){
 
         wz.tool.exitFullscreen();
-
 
     }else{
 
@@ -472,6 +356,8 @@ var toggleFullscreen = function(){
 
         normalWidth  = win.width();
         normalHeight = win.height();
+        normalScale  = wz.app.storage('scale');
+
     }
 
 };
@@ -491,16 +377,8 @@ var hideControls = function(){
 };
 
 win
-.on( 'click', '.wz-view-fullscreen', function(){
+.on( 'click', '.ui-fullscreen', function(){
     toggleFullscreen();
-})
-
-.on( 'click', '.wz-view-minimize', function(){
-
-    if( win.hasClass('fullscreen') ){
-        toggleFullscreen();
-    }
-
 })
 
 .on( 'enterfullscreen', function(){
@@ -510,7 +388,6 @@ win
     win.css( 'width', screen.width );
     win.css( 'height', screen.height );
 
-    $('.weevisor-sidebar').hide();
     hideControls();
 
     _scaleImage( screen.width / parseInt( imageLoaded.metadata.exif.imageWidth, 10 ) );
@@ -526,11 +403,10 @@ win
     win.css( 'width', normalWidth );
     win.css( 'height', normalHeight );
 
-    $('.weevisor-sidebar').show();
     showControls();
 
-    _scaleImage( normalWidth / parseInt( imageLoaded.metadata.exif.imageWidth, 10 ) );
-    zoom.val( _preciseDecimal( normalWidth / parseInt( imageLoaded.metadata.exif.imageWidth, 10 ) * 100 ) );
+    _scaleImage( normalScale );
+    zoom.val( _preciseDecimal( normalScale * 100 ) );
 
 })
 
@@ -553,55 +429,24 @@ win
 
     }
 
-})
+});
 
-.key( 'left, pageup', function(){
-
-  var sidebarArray = $('.weevisor-sidebar-page');
-  var itemSelected = $('.weevisor-sidebar-page.selected');
-  var positionSelected = parseInt( itemSelected.children('span').text() );
-
-  if (positionSelected > 1 ){
-
-    var prevItem = sidebarArray.eq( positionSelected - 1 );
-    itemSelected.removeClass('selected');
-    prevItem.addClass('selected');
-
-    var img = $( 'img', zone ).eq( prevItem.index() - 1 );
-    //zone.animate( { scrollTop : img[ 0 ].offsetTop - parseInt( img.css('margin-top') ) }, 250 );
-    zone.scrollTop( img[ 0 ].offsetTop - parseInt( img.css('margin-top') ) );
-
-    var tmp = $( '.weevisor-sidebar-page.selected');
-    sidebar
-        .stop()
-        .clearQueue()
-        .animate( { scrollTop : tmp[ 0 ].offsetTop - parseInt( tmp.css('margin-top'), 10 ) }, 250 );
-
-  }
+/*.key( 'left, pageup', function(){
 
 })
 
 .key( 'right, pagedown', function(){
 
-  var sidebarArray = $('.weevisor-sidebar-page');
-  var itemSelected = $('.weevisor-sidebar-page.selected');
-  var positionSelected = parseInt( itemSelected.children('span').text() );
+});*/
 
-  if (positionSelected < sidebarArray.length - 1 ){
+// Start load
+if( location.host.indexOf('file') === -1 ){
 
-    var nextItem = sidebarArray.eq( positionSelected + 1 );
-    itemSelected.removeClass('selected');
-    nextItem.addClass('selected');
+  win.deskitemX( parseInt( ( wz.tool.desktopWidth() - win.width() ) / 2, 10 ) );
+  win.deskitemY( parseInt( ( wz.tool.desktopHeight() - win.height() ) / 2, 10 ) );
 
-    var img = $( 'img', zone ).eq( nextItem.index() - 1 );
-    //zone.animate( { scrollTop : img[ 0 ].offsetTop - parseInt( img.css('margin-top') ) }, 250 );
-    zone.scrollTop( img[ 0 ].offsetTop - parseInt( img.css('margin-top') ) );
+}else{
+  wz.app.maximizeView( win );
+}
 
-    var tmp = $( '.weevisor-sidebar-page.selected');
-    sidebar
-        .stop()
-        .clearQueue()
-        .animate( { scrollTop : tmp[ 0 ].offsetTop - parseInt( tmp.css('margin-top'), 10 ) }, 250 );
-  }
-
-});
+_loadImage( wz.app.storage('file') );
