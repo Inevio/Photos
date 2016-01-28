@@ -103,7 +103,7 @@
 
 .weevisor-content{
     width: 100%;
-    height: ~'calc(100% - 41px)';
+    height: ~'calc(100% - 92px)';
     float: left;
     border-radius: 0 0 3px 3px;
     position: relative;
@@ -216,4 +216,10 @@
   float: left;
   background: url('@static/sprite.png') -48px 0px no-repeat;
   background-size: 57px 15px;
+}
+
+.ui-footer{
+  width: 100%;
+  height: 51px;
+  display: inline-block;
 }

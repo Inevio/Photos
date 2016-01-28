@@ -13,6 +13,7 @@
     var normalWidth       = 0;
     var normalHeight      = 0;
     var normalScale       = 0;
+    var normalZoom        = -1;
     var imageLoaded       = null;
 
     var menuHeight = $( '.wz-view-menu', win ).outerHeight();
@@ -161,138 +162,22 @@
     };
 
 // Events
-    win
-    .on( 'ui-view-resize ui-view-maximize ui-view-unmaximize', function(){
+win
+.on( 'ui-view-resize ui-view-maximize ui-view-unmaximize', function(){
 
-      _marginImage();
+  _marginImage();
 
-    });
+});
 
-    minus
-    .on( 'click', function(){
+minus
+.on( 'click', function(){
 
-        var zoom    = wz.app.storage('zoom');
-        var scrollX = 0;
-        var scrollY = 0;
-        var resize  = ( zone[ 0 ].scrollWidth - zone[ 0 ].offsetWidth ) || ( zone[ 0 ].scrollHeight - zone[ 0 ].offsetHeight );
+    var zoom    = wz.app.storage('zoom');
+    var scrollX = 0;
+    var scrollY = 0;
+    var resize  = ( zone[ 0 ].scrollWidth - zone[ 0 ].offsetWidth ) || ( zone[ 0 ].scrollHeight - zone[ 0 ].offsetHeight );
 
-        if( resize ){
-
-            /*
-             *
-             * Las siguientes variables se han puesto directamente en la fórmula para no declarar variables que solo se usan una vez
-             *
-             * var posX   = e.clientX - offset.left;
-             * var posY   = e.clientY - offset.top - menuHeight;
-             *
-             * Es la posición del ratón dentro de la zona de la imagen
-             *
-             */
-
-            var perX = ( zone[ 0 ].scrollLeft + ( zone[ 0 ].offsetWidth / 2 ) ) / zone[ 0 ].scrollWidth;
-            var perY = ( zone[ 0 ].scrollTop + ( zone[ 0 ].offsetHeight / 2 ) ) / zone[ 0 ].scrollHeight;
-
-        }
-
-        _scaleButton( -1 );
-
-        // Si no se comprueba el zoom se pueden emular desplazamientos, esto lo previene
-        if( zoom !== wz.app.storage('zoom') ){
-
-            if( resize ){
-
-                scrollX = ( zone[ 0 ].scrollWidth * perX ) - ( zone[ 0 ].offsetWidth * perX );
-                scrollY = ( zone[ 0 ].scrollHeight * perY ) - ( zone[ 0 ].offsetHeight * perY );
-
-            }
-
-            zone
-                .scrollLeft( scrollX )
-                .scrollTop( scrollY );
-
-        }
-
-    });
-
-    plus
-    .on( 'click', function(){
-
-        var zoom    = wz.app.storage('zoom');
-        var scrollX = 0;
-        var scrollY = 0;
-        var resize  = ( zone[ 0 ].scrollWidth - zone[ 0 ].offsetWidth ) || ( zone[ 0 ].scrollHeight - zone[ 0 ].offsetHeight );
-
-        if( resize || wz.app.storage('zoom') === -1 ){
-
-            /*
-             *
-             * Las siguientes variables se han puesto directamente en la fórmula para no declarar variables que solo se usan una vez
-             *
-             * var posX   = e.clientX - offset.left;
-             * var posY   = e.clientY - offset.top - menuHeight;
-             *
-             * Es la posición del ratón dentro de la zona de la imagen
-             *
-             */
-
-            var perX = ( zone[ 0 ].scrollLeft + ( zone[ 0 ].offsetWidth / 2 ) ) / zone[ 0 ].scrollWidth;
-            var perY = ( zone[ 0 ].scrollTop + ( zone[ 0 ].offsetHeight / 2 ) ) / zone[ 0 ].scrollHeight;
-
-        }
-
-        _scaleButton( 1 );
-
-        // Si no se comprueba el zoom se pueden emular desplazamientos, esto lo previene
-        if( zoom !== wz.app.storage('zoom') ){
-
-            if( resize || zoom === -1 ){
-
-                scrollX = ( zone[ 0 ].scrollWidth * perX ) - ( zone[ 0 ].offsetWidth * perX );
-                scrollY = ( zone[ 0 ].scrollHeight * perY ) - ( zone[ 0 ].offsetHeight * perY );
-
-            }
-
-            zone
-                .scrollLeft( scrollX )
-                .scrollTop( scrollY );
-
-        }
-
-    });
-
-    zoom
-    .on( 'change', function(){
-
-        var value = _preciseDecimal( zoom.val() / 100 );
-
-        wz.app.storage( 'zoom', -1 );
-
-        _scaleImage( value );
-
-        zoom
-            .val( _preciseDecimal( wz.app.storage('scale') * 100 ) )
-            .blur(); // To Do -> Provoca que se vuelva a invocar el evento al dar a intro
-
-    });
-
-    win
-    .key( 'numadd', function(){
-        plus.click();
-    })
-
-    .key( 'numsubtract', function(){
-        minus.click();
-    });
-
-    zone
-    .on( 'mousewheel', function( e, d, x, y ){
-
-      var zoom    = wz.app.storage('zoom');
-      var scrollX = 0;
-      var scrollY = 0;
-      var resize  = ( this.scrollWidth - this.offsetWidth ) || ( this.scrollHeight - this.offsetHeight );
-
-      if( resize || wz.app.storage('zoom') === -1 ){
+    if( resize ){
 
         /*
          *
@@ -305,35 +190,151 @@
          *
          */
 
-        var offset = win.offset();
-        var perX   = ( this.scrollLeft + ( e.clientX - offset.left ) ) / this.scrollWidth;
-        var perY   = ( this.scrollTop + ( e.clientY - offset.top - menuHeight ) ) / this.scrollHeight;
+        var perX = ( zone[ 0 ].scrollLeft + ( zone[ 0 ].offsetWidth / 2 ) ) / zone[ 0 ].scrollWidth;
+        var perY = ( zone[ 0 ].scrollTop + ( zone[ 0 ].offsetHeight / 2 ) ) / zone[ 0 ].scrollHeight;
 
-      }
+    }
 
-      if( y < 0 ){
-        _scaleButton( -1 );
-      }else if( y > 0 ){
-        _scaleButton( 1 );
-      }
+    _scaleButton( -1 );
 
-      // Si no se comprueba el zoom se pueden emular desplazamientos, esto lo previene
-      if( zoom !== wz.app.storage('zoom') ){
+    // Si no se comprueba el zoom se pueden emular desplazamientos, esto lo previene
+    if( zoom !== wz.app.storage('zoom') ){
 
-          if( resize || zoom === -1 ){
+        if( resize ){
 
-            scrollX = ( this.scrollWidth * perX ) - ( this.offsetWidth * perX );
-            scrollY = ( this.scrollHeight * perY ) - ( this.offsetHeight * perY );
+            scrollX = ( zone[ 0 ].scrollWidth * perX ) - ( zone[ 0 ].offsetWidth * perX );
+            scrollY = ( zone[ 0 ].scrollHeight * perY ) - ( zone[ 0 ].offsetHeight * perY );
 
-          }
+        }
 
-          $(this)
+        zone
             .scrollLeft( scrollX )
             .scrollTop( scrollY );
 
+    }
+
+});
+
+plus
+.on( 'click', function(){
+
+    var zoom    = wz.app.storage('zoom');
+    var scrollX = 0;
+    var scrollY = 0;
+    var resize  = ( zone[ 0 ].scrollWidth - zone[ 0 ].offsetWidth ) || ( zone[ 0 ].scrollHeight - zone[ 0 ].offsetHeight );
+
+    if( resize || wz.app.storage('zoom') === -1 ){
+
+        /*
+         *
+         * Las siguientes variables se han puesto directamente en la fórmula para no declarar variables que solo se usan una vez
+         *
+         * var posX   = e.clientX - offset.left;
+         * var posY   = e.clientY - offset.top - menuHeight;
+         *
+         * Es la posición del ratón dentro de la zona de la imagen
+         *
+         */
+
+        var perX = ( zone[ 0 ].scrollLeft + ( zone[ 0 ].offsetWidth / 2 ) ) / zone[ 0 ].scrollWidth;
+        var perY = ( zone[ 0 ].scrollTop + ( zone[ 0 ].offsetHeight / 2 ) ) / zone[ 0 ].scrollHeight;
+
+    }
+
+    _scaleButton( 1 );
+
+    // Si no se comprueba el zoom se pueden emular desplazamientos, esto lo previene
+    if( zoom !== wz.app.storage('zoom') ){
+
+        if( resize || zoom === -1 ){
+
+            scrollX = ( zone[ 0 ].scrollWidth * perX ) - ( zone[ 0 ].offsetWidth * perX );
+            scrollY = ( zone[ 0 ].scrollHeight * perY ) - ( zone[ 0 ].offsetHeight * perY );
+
+        }
+
+        zone
+            .scrollLeft( scrollX )
+            .scrollTop( scrollY );
+
+    }
+
+});
+
+zoom
+.on( 'change', function(){
+
+    var value = _preciseDecimal( zoom.val() / 100 );
+
+    wz.app.storage( 'zoom', -1 );
+
+    _scaleImage( value );
+
+    zoom
+        .val( _preciseDecimal( wz.app.storage('scale') * 100 ) )
+        .blur(); // To Do -> Provoca que se vuelva a invocar el evento al dar a intro
+
+});
+
+win
+.key( 'numadd', function(){
+    plus.click();
+})
+
+.key( 'numsubtract', function(){
+    minus.click();
+});
+
+zone
+.on( 'mousewheel', function( e, d, x, y ){
+
+  var zoom    = wz.app.storage('zoom');
+  var scrollX = 0;
+  var scrollY = 0;
+  var resize  = ( this.scrollWidth - this.offsetWidth ) || ( this.scrollHeight - this.offsetHeight );
+
+  if( resize || wz.app.storage('zoom') === -1 ){
+
+    /*
+     *
+     * Las siguientes variables se han puesto directamente en la fórmula para no declarar variables que solo se usan una vez
+     *
+     * var posX   = e.clientX - offset.left;
+     * var posY   = e.clientY - offset.top - menuHeight;
+     *
+     * Es la posición del ratón dentro de la zona de la imagen
+     *
+     */
+
+    var offset = win.offset();
+    var perX   = ( this.scrollLeft + ( e.clientX - offset.left ) ) / this.scrollWidth;
+    var perY   = ( this.scrollTop + ( e.clientY - offset.top - menuHeight ) ) / this.scrollHeight;
+
+  }
+
+  if( y < 0 ){
+    _scaleButton( -1 );
+  }else if( y > 0 ){
+    _scaleButton( 1 );
+  }
+
+  // Si no se comprueba el zoom se pueden emular desplazamientos, esto lo previene
+  if( zoom !== wz.app.storage('zoom') ){
+
+      if( resize || zoom === -1 ){
+
+        scrollX = ( this.scrollWidth * perX ) - ( this.offsetWidth * perX );
+        scrollY = ( this.scrollHeight * perY ) - ( this.offsetHeight * perY );
+
       }
 
-    });
+      $(this)
+        .scrollLeft( scrollX )
+        .scrollTop( scrollY );
+
+  }
+
+});
 
 /* fullscreen mode */
 var toggleFullscreen = function(){
@@ -356,7 +357,8 @@ var toggleFullscreen = function(){
 
         normalWidth  = win.width();
         normalHeight = win.height();
-        normalScale  = wz.app.storage('scale');
+        normalScale  = wz.app.storage( 'scale' );
+        normalZoom   = wz.app.storage( 'zoom' );
 
     }
 
@@ -392,7 +394,7 @@ win
 
     _scaleImage( screen.width / parseInt( imageLoaded.metadata.exif.imageWidth, 10 ) );
     zoom.val( _preciseDecimal( screen.width / parseInt( imageLoaded.metadata.exif.imageWidth, 10 ) * 100 ) );
-    console.log(zoom.val());
+    console.log(normalScale);
 
 })
 
@@ -405,7 +407,9 @@ win
 
     showControls();
 
+    console.log(normalScale);
     _scaleImage( normalScale );
+    wz.app.storage( 'zoom' , normalZoom );
     zoom.val( _preciseDecimal( normalScale * 100 ) );
 
 })

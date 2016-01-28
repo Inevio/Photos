@@ -52,6 +52,8 @@ if( params && params.command === 'openFile' ){
         wz.app.storage( 'file', structure );
         wz.app.storage( 'zoom', -1 );
         win.addClass('dark');
+        win.css({'background':'#2c3238'});
+        $('.weevisor-content').css({'background':'#3f4750'});
 
         start();
 
