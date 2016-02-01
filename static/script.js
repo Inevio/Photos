@@ -1,165 +1,169 @@
 
 // Variables
-    var win     = $( this );
-    var minus   = $( '.weevisor-zoom-minus', win );
-    var plus    = $( '.weevisor-zoom-plus', win );
-    var zone    = $( '.weevisor-images', win );
-    var zoom    = $( '.weevisor-zoom', win );
-    var uiBarTop= $('.ui-header');
-    var isWebKit          = /webkit/i.test( navigator.userAgent );
-    var prevClientX       = 0;
-    var prevClientY       = 0;
-    var hideControlsTimer = 0;
-    var normalWidth       = 0;
-    var normalHeight      = 0;
-    var normalScale       = 0;
-    var normalZoom        = -1;
-    var imageLoaded       = null;
+var win     = $( this );
+var minus   = $( '.weevisor-zoom-minus', win );
+var plus    = $( '.weevisor-zoom-plus', win );
+var zone    = $( '.weevisor-images', win );
+var zoom    = $( '.weevisor-zoom', win );
+var uiBarTop= $('.ui-header');
+var isWebKit          = /webkit/i.test( navigator.userAgent );
+var prevClientX       = 0;
+var prevClientY       = 0;
+var hideControlsTimer = 0;
+var normalWidth       = 0;
+var normalHeight      = 0;
+var normalScale       = 0;
+var normalZoom        = -1;
+var pictures          = wz.app.storage('pictures');
+var index             = wz.app.storage('index');
+var imageLoaded       = pictures[index];
 
-    var menuHeight = $( '.wz-view-menu', win ).outerHeight();
+var menuHeight = $( '.wz-view-menu', win ).outerHeight();
 
 // Valid zoom
-    var validZoom = [ 0.01, 0.02, 0.03, 0.04, 0.06, 0.08, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.75, 1, 1.5, 2, 3, 4, 5 ];
+var validZoom = [ 0.01, 0.02, 0.03, 0.04, 0.06, 0.08, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.75, 1, 1.5, 2, 3, 4, 5 ];
 
 // Private Methods
-    var _preciseDecimal = function( number ){
-        return parseFloat( number.toFixed( 2 ) );
-    };
+var _preciseDecimal = function( number ){
+    return parseFloat( number.toFixed( 2 ) );
+};
 
-    var _loadImage = function( file ){
+var _loadImage = function( file ){
 
-        imageLoaded = file;
+  $( '.weevisor-title', win ).text( file.name );
+  imageLoaded = file;
 
-        $( '<img />')
-          .attr( 'src', file.thumbnails.original )
-          .appendTo( zone )
-          .on( 'load', function(){ });
+  $( '.weevisor-images img')
+    .attr( 'src', file.thumbnails.original )
+    .on( 'load', function(){
 
-          if( wz.app.storage('horizontal') ){
-            wz.app.storage( 'scale', zone.width() / parseInt( file.metadata.exif.imageWidth, 10 ) );
-          }else{
-            wz.app.storage( 'scale', zone.height() / parseInt( file.metadata.exif.imageHeight, 10 ) );
-          }
+      if( wz.app.storage('horizontal') ){
+        wz.app.storage( 'scale', zone.width() / parseInt( file.metadata.exif.imageWidth, 10 ) );
+      }else{
+        wz.app.storage( 'scale', zone.height() / parseInt( file.metadata.exif.imageHeight, 10 ) );
+      }
 
-          if( wz.app.storage('scale') > 1 ){
-            wz.app.storage('scale', 1 );
-          }
+      if( wz.app.storage('scale') > 1 ){
+        wz.app.storage('scale', 1 );
+      }
 
-          _scaleImage( wz.app.storage('scale') );
-          zoom.val( _preciseDecimal( wz.app.storage('scale') * 100 ) );
+      _scaleImage( wz.app.storage('scale') );
+      zoom.val( _preciseDecimal( wz.app.storage('scale') * 100 ) );
 
-    };
+    });
 
-    var _scaleImage = function( scale ){
+};
 
-        scale = _preciseDecimal( parseFloat( scale, 10 ) );
+var _scaleImage = function( scale ){
 
-        if( isNaN( scale ) || scale <= 0 || scale > 5 ){
-            return false;
-        }
+    scale = _preciseDecimal( parseFloat( scale, 10 ) );
 
-        $( 'img', zone )
-            .width( parseInt( scale * wz.app.storage('file').metadata.exif.imageWidth, 10 ) )
-            .height( parseInt( scale * wz.app.storage('file').metadata.exif.imageHeight, 10 ) );
+    if( isNaN( scale ) || scale <= 0 || scale > 5 ){
+        return false;
+    }
 
-        _marginImage();
-        _detectCursor();
+    $( 'img', zone )
+        .width( parseInt( scale * imageLoaded.metadata.exif.imageWidth, 10 ) )
+        .height( parseInt( scale * imageLoaded.metadata.exif.imageHeight, 10 ) );
 
-        wz.app.storage( 'scale', scale );
+    _marginImage();
+    _detectCursor();
 
-    };
+    wz.app.storage( 'scale', scale );
 
-    var _marginImage = function(){
+};
 
-        var img   = $( 'img', zone );
-        var scale = ( zone.height() - img.height() ) / 2;
+var _marginImage = function(){
 
-        img.css( 'margin-top', scale > 0 ? scale : 0 );
+    var img   = $( 'img', zone );
+    var scale = ( zone.height() - img.height() ) / 2;
 
-    };
+    img.css( 'margin-top', scale > 0 ? scale : 0 );
 
-    var _scaleButton = function( dir ){
+};
 
-        if( wz.app.storage('zoom') === -1 || win.hasClass('fullscreen') ){
+var _scaleButton = function( dir ){
 
-            var i = 0;
-            var j = validZoom.length;
+    if( wz.app.storage('zoom') === -1 || win.hasClass('fullscreen') ){
 
-            if( dir > 0 ){
+        var i = 0;
+        var j = validZoom.length;
 
-                for( i = 0; i < j; i++ ){
-                    if( validZoom[ i ] > wz.app.storage('scale') ) break;
-                }
+        if( dir > 0 ){
 
-            }else{
-
-                for( i = 0; i < j; i++ ){
-                    if( validZoom[ i ] <= wz.app.storage('scale') && validZoom[ i + 1 ] > wz.app.storage('scale') ) break;
-                }
-
-                if( validZoom[ i ] === wz.app.storage('scale') && validZoom[ i - 1 ] ){
-                    i--;
-                }
-
-                if( i >= validZoom.length ){
-                    i = validZoom.length - 2;
-                }
-
+            for( i = 0; i < j; i++ ){
+                if( validZoom[ i ] > wz.app.storage('scale') ) break;
             }
 
-            wz.app.storage( 'zoom', i );
-
-            _scaleImage( validZoom[ wz.app.storage('zoom') ] );
-
-            zoom.val( _preciseDecimal( wz.app.storage('scale') * 100 ) );
-
-        }else if( validZoom[ wz.app.storage('zoom') + dir ] && !win.hasClass('fullscreen') ){
-
-            var newZoom  = wz.app.storage('zoom') + dir;
-            var winScale = 0;
-
-            if( wz.app.storage('horizontal') ){
-                winScale = zone.width() / wz.app.storage('file').metadata.exif.imageWidth;
-            }else{
-                winScale = zone.height() / wz.app.storage('file').metadata.exif.imageHeight;
-            }
-
-            if( dir > 0 && validZoom[ wz.app.storage('zoom') ] < winScale && validZoom[ newZoom ] >= winScale ){
-
-                wz.app.storage( 'zoom', -1 );
-                newZoom = winScale;
-
-            }else if( dir < 0 && validZoom[ wz.app.storage('zoom') ] > winScale && validZoom[ newZoom ] < winScale ){
-
-                wz.app.storage( 'zoom', -1 );
-                newZoom = winScale;
-
-            }else{
-
-                wz.app.storage( 'zoom', newZoom );
-                newZoom = validZoom[ wz.app.storage('zoom') ];
-
-            }
-
-            _scaleImage( newZoom );
-
-            zoom.val( _preciseDecimal( wz.app.storage('scale') * 100 ) );
-
-        }
-
-    };
-
-    var _detectCursor = function(){
-
-        var img = $( 'img', zone );
-
-        if( img.height() <= zone.height() && img.width() <= zone.width() ){
-          zone.addClass('hide-hand');
         }else{
-          zone.removeClass('hide-hand');
+
+            for( i = 0; i < j; i++ ){
+                if( validZoom[ i ] <= wz.app.storage('scale') && validZoom[ i + 1 ] > wz.app.storage('scale') ) break;
+            }
+
+            if( validZoom[ i ] === wz.app.storage('scale') && validZoom[ i - 1 ] ){
+                i--;
+            }
+
+            if( i >= validZoom.length ){
+                i = validZoom.length - 2;
+            }
+
         }
 
-    };
+        wz.app.storage( 'zoom', i );
+
+        _scaleImage( validZoom[ wz.app.storage('zoom') ] );
+
+        zoom.val( _preciseDecimal( wz.app.storage('scale') * 100 ) );
+
+    }else if( validZoom[ wz.app.storage('zoom') + dir ] && !win.hasClass('fullscreen') ){
+
+        var newZoom  = wz.app.storage('zoom') + dir;
+        var winScale = 0;
+
+        if( wz.app.storage('horizontal') ){
+            winScale = zone.width() / imageLoaded.metadata.exif.imageWidth;
+        }else{
+            winScale = zone.height() / imageLoaded.metadata.exif.imageHeight;
+        }
+
+        if( dir > 0 && validZoom[ wz.app.storage('zoom') ] < winScale && validZoom[ newZoom ] >= winScale ){
+
+            wz.app.storage( 'zoom', -1 );
+            newZoom = winScale;
+
+        }else if( dir < 0 && validZoom[ wz.app.storage('zoom') ] > winScale && validZoom[ newZoom ] < winScale ){
+
+            wz.app.storage( 'zoom', -1 );
+            newZoom = winScale;
+
+        }else{
+
+            wz.app.storage( 'zoom', newZoom );
+            newZoom = validZoom[ wz.app.storage('zoom') ];
+
+        }
+
+        _scaleImage( newZoom );
+
+        zoom.val( _preciseDecimal( wz.app.storage('scale') * 100 ) );
+
+    }
+
+};
+
+var _detectCursor = function(){
+
+    var img = $( 'img', zone );
+
+    if( img.height() <= zone.height() && img.width() <= zone.width() ){
+      zone.addClass('hide-hand');
+    }else{
+      zone.removeClass('hide-hand');
+    }
+
+};
 
 // Events
 win
@@ -433,15 +437,39 @@ win
 
     }
 
-});
+})
 
-/*.key( 'left, pageup', function(){
+.key( 'left, pageup', function(){
+
+  if( pictures.length === 1 ){
+
+  }else{
+    if( index > 0 ){
+      index--;
+      _loadImage(pictures[index]);
+    }else{
+      index = pictures.length - 1;
+      _loadImage(pictures[index]);
+    }
+  }
 
 })
 
 .key( 'right, pagedown', function(){
 
-});*/
+  if( pictures.length === 1 ){
+
+  }else{
+    if( index < pictures.length - 1 ){
+      index++;
+      _loadImage(pictures[index]);
+    }else{
+      index = 0;
+      _loadImage(pictures[index]);
+    }
+  }
+
+});
 
 // Start load
 if( location.host.indexOf('file') === -1 ){
@@ -453,4 +481,4 @@ if( location.host.indexOf('file') === -1 ){
   wz.app.maximizeView( win );
 }
 
-_loadImage( wz.app.storage('file') );
+_loadImage( pictures[index] );
