@@ -1,12 +1,13 @@
 
 // Variables
-var win     = $( this );
-var minus   = $( '.weevisor-zoom-minus', win );
-var plus    = $( '.weevisor-zoom-plus', win );
-var zone    = $( '.weevisor-images', win );
-var zoom    = $( '.weevisor-zoom', win );
-var uiBarTop= $('.ui-header');
+var win               = $( this );
+var minus             = $( '.weevisor-zoom-minus', win );
+var plus              = $( '.weevisor-zoom-plus', win );
+var zone              = $( '.weevisor-images', win );
+var zoomUi            = $( '.weevisor-zoom', win );
+var uiBarTop          = $('.ui-header');
 var isWebKit          = /webkit/i.test( navigator.userAgent );
+var view_margin       = 50;
 var prevClientX       = 0;
 var prevClientY       = 0;
 var hideControlsTimer = 0;
@@ -14,9 +15,14 @@ var normalWidth       = 0;
 var normalHeight      = 0;
 var normalScale       = 0;
 var normalZoom        = -1;
-var pictures          = wz.app.storage('pictures');
-var index             = wz.app.storage('index');
-var imageLoaded       = pictures[index];
+var pictures          = [];
+var picIndex          = -1;
+var horizontal        = true;
+var zoom;
+var imageLoaded;
+var scale;
+var lastFile          = false;
+
 
 var menuHeight = $( '.wz-view-menu', win ).outerHeight();
 
@@ -28,128 +34,160 @@ var _preciseDecimal = function( number ){
     return parseFloat( number.toFixed( 2 ) );
 };
 
+var _startApp = function(){
+
+  if( params && params.command === 'openFile' ){
+
+    // To Do -> Error
+    var initialIndex = params.list.indexOf( params.data );
+    var newIndex = 0;
+
+    params.list.forEach( function(item, index){
+
+      wz.fs( item, function( error, structure ){
+
+        if( !error ){
+          if( structure.mime.indexOf('image') !== -1 ){
+
+            pictures[ newIndex ] = structure;
+
+            if( index === initialIndex ){
+
+              picIndex = newIndex;
+              _loadImage( pictures[picIndex] );
+
+            }
+
+            newIndex++;
+          }
+        }
+
+      });
+
+    });
+  }
+
+}
+
 var _loadImage = function( file ){
 
   $( '.weevisor-title', win ).text( file.name );
   imageLoaded = file;
 
+  var width  = parseInt( file.metadata.exif.imageWidth, 10 );
+  var height = parseInt( file.metadata.exif.imageHeight, 10 );
+
+  var scale1 = zone.width() / width ;
+  var scale2 = zone.height() / height ;
+
+  if( scale1 < scale2 ){
+    scale = scale1;
+  }else{
+    scale = scale2;
+  }
+
+  if( scale > 1 ){
+    scale = 1;
+  }
+
+  zoom = -1;
+  _scaleImage( scale );
+  zoomUi.val( _preciseDecimal( scale * 100 ) );
+
   $( '.weevisor-images img')
     .attr( 'src', file.thumbnails.original )
     .on( 'load', function(){
-
-      if( wz.app.storage('horizontal') ){
-        wz.app.storage( 'scale', zone.width() / parseInt( file.metadata.exif.imageWidth, 10 ) );
-      }else{
-        wz.app.storage( 'scale', zone.height() / parseInt( file.metadata.exif.imageHeight, 10 ) );
-      }
-
-      if( wz.app.storage('scale') > 1 ){
-        wz.app.storage('scale', 1 );
-      }
-
-      _scaleImage( wz.app.storage('scale') );
-      zoom.val( _preciseDecimal( wz.app.storage('scale') * 100 ) );
-
     });
 
 };
 
-var _scaleImage = function( scale ){
+var _scaleImage = function( scaleArg ){
 
-    scale = _preciseDecimal( parseFloat( scale, 10 ) );
+  scale = _preciseDecimal( parseFloat( scaleArg, 10 ) );
 
-    if( isNaN( scale ) || scale <= 0 || scale > 5 ){
-        return false;
-    }
+  if( isNaN( scale ) || scale <= 0 || scale > 5 ){
+      return false;
+  }
 
-    $( 'img', zone )
-        .width( parseInt( scale * imageLoaded.metadata.exif.imageWidth, 10 ) )
-        .height( parseInt( scale * imageLoaded.metadata.exif.imageHeight, 10 ) );
+  $( 'img', zone )
+      .width( parseInt( scale * imageLoaded.metadata.exif.imageWidth, 10 ) )
+      .height( parseInt( scale * imageLoaded.metadata.exif.imageHeight, 10 ) );
 
-    _marginImage();
-    _detectCursor();
-
-    wz.app.storage( 'scale', scale );
+  _marginImage();
+  _detectCursor();
 
 };
 
 var _marginImage = function(){
 
-    var img   = $( 'img', zone );
-    var scale = ( zone.height() - img.height() ) / 2;
+  var img   = $( 'img', zone );
+  var scale = ( zone.height() - img.height() ) / 2;
 
-    img.css( 'margin-top', scale > 0 ? scale : 0 );
+  img.css( 'margin-top', scale > 0 ? scale : 0 );
 
 };
 
 var _scaleButton = function( dir ){
 
-    if( wz.app.storage('zoom') === -1 || win.hasClass('fullscreen') ){
+  if( zoom === -1 || win.hasClass('fullscreen') ){
 
-        var i = 0;
-        var j = validZoom.length;
+      var i = 0;
+      var j = validZoom.length;
 
-        if( dir > 0 ){
+      if( dir > 0 ){
 
-            for( i = 0; i < j; i++ ){
-                if( validZoom[ i ] > wz.app.storage('scale') ) break;
-            }
+          for( i = 0; i < j; i++ ){
+              if( validZoom[ i ] > scale ) break;
+          }
 
-        }else{
+      }else{
 
-            for( i = 0; i < j; i++ ){
-                if( validZoom[ i ] <= wz.app.storage('scale') && validZoom[ i + 1 ] > wz.app.storage('scale') ) break;
-            }
+          for( i = 0; i < j; i++ ){
+              if( validZoom[ i ] <= scale && validZoom[ i + 1 ] > scale ) break;
+          }
 
-            if( validZoom[ i ] === wz.app.storage('scale') && validZoom[ i - 1 ] ){
-                i--;
-            }
+          if( validZoom[ i ] === scale && validZoom[ i - 1 ] ){
+              i--;
+          }
 
-            if( i >= validZoom.length ){
-                i = validZoom.length - 2;
-            }
+          if( i >= validZoom.length ){
+              i = validZoom.length - 2;
+          }
 
-        }
+      }
 
-        wz.app.storage( 'zoom', i );
+      zoom = i ;
+      _scaleImage( validZoom[ zoom ] );
+      console.log( zoom, validZoom[zoom] , scale );
+      zoomUi.val( _preciseDecimal( scale * 100 ) );
 
-        _scaleImage( validZoom[ wz.app.storage('zoom') ] );
+  }else if( validZoom[ zoom + dir ] && !win.hasClass('fullscreen') ){
 
-        zoom.val( _preciseDecimal( wz.app.storage('scale') * 100 ) );
+      var newZoom  = zoom + dir;
+      var winScale = scale;
 
-    }else if( validZoom[ wz.app.storage('zoom') + dir ] && !win.hasClass('fullscreen') ){
+      if( dir > 0 && validZoom[ zoom ] < winScale && validZoom[ newZoom ] >= winScale ){
 
-        var newZoom  = wz.app.storage('zoom') + dir;
-        var winScale = 0;
+          zoom = -1 ;
+          newZoom = winScale;
 
-        if( wz.app.storage('horizontal') ){
-            winScale = zone.width() / imageLoaded.metadata.exif.imageWidth;
-        }else{
-            winScale = zone.height() / imageLoaded.metadata.exif.imageHeight;
-        }
+      }else if( dir < 0 && validZoom[ zoom ] > winScale && validZoom[ newZoom ] < winScale ){
 
-        if( dir > 0 && validZoom[ wz.app.storage('zoom') ] < winScale && validZoom[ newZoom ] >= winScale ){
+          zoom = -1;
+          newZoom = winScale;
 
-            wz.app.storage( 'zoom', -1 );
-            newZoom = winScale;
+      }else{
 
-        }else if( dir < 0 && validZoom[ wz.app.storage('zoom') ] > winScale && validZoom[ newZoom ] < winScale ){
+          zoom = newZoom ;
+          newZoom = validZoom[ zoom ];
 
-            wz.app.storage( 'zoom', -1 );
-            newZoom = winScale;
+      }
 
-        }else{
+      _scaleImage( newZoom );
+      console.log( newZoom, validZoom[zoom] , scale );
+      zoomUi.val( _preciseDecimal( scale * 100 ) );
 
-            wz.app.storage( 'zoom', newZoom );
-            newZoom = validZoom[ wz.app.storage('zoom') ];
-
-        }
-
-        _scaleImage( newZoom );
-
-        zoom.val( _preciseDecimal( wz.app.storage('scale') * 100 ) );
-
-    }
+  }
 
 };
 
@@ -176,7 +214,7 @@ win
 minus
 .on( 'click', function(){
 
-    var zoom    = wz.app.storage('zoom');
+    var zoom2   = zoom;
     var scrollX = 0;
     var scrollY = 0;
     var resize  = ( zone[ 0 ].scrollWidth - zone[ 0 ].offsetWidth ) || ( zone[ 0 ].scrollHeight - zone[ 0 ].offsetHeight );
@@ -202,7 +240,7 @@ minus
     _scaleButton( -1 );
 
     // Si no se comprueba el zoom se pueden emular desplazamientos, esto lo previene
-    if( zoom !== wz.app.storage('zoom') ){
+    if( zoom2 !== zoom ){
 
         if( resize ){
 
@@ -222,12 +260,12 @@ minus
 plus
 .on( 'click', function(){
 
-    var zoom    = wz.app.storage('zoom');
+    var zoom2    = zoom;
     var scrollX = 0;
     var scrollY = 0;
     var resize  = ( zone[ 0 ].scrollWidth - zone[ 0 ].offsetWidth ) || ( zone[ 0 ].scrollHeight - zone[ 0 ].offsetHeight );
 
-    if( resize || wz.app.storage('zoom') === -1 ){
+    if( resize || zoom === -1 ){
 
         /*
          *
@@ -248,7 +286,7 @@ plus
     _scaleButton( 1 );
 
     // Si no se comprueba el zoom se pueden emular desplazamientos, esto lo previene
-    if( zoom !== wz.app.storage('zoom') ){
+    if( zoom2 !== zoom ){
 
         if( resize || zoom === -1 ){
 
@@ -265,17 +303,17 @@ plus
 
 });
 
-zoom
+zoomUi
 .on( 'change', function(){
 
-    var value = _preciseDecimal( zoom.val() / 100 );
+    var value = _preciseDecimal( zoomUi.val() / 100 );
 
-    wz.app.storage( 'zoom', -1 );
+    zoom = -1;
 
     _scaleImage( value );
 
-    zoom
-        .val( _preciseDecimal( wz.app.storage('scale') * 100 ) )
+    zoomUi
+        .val( _preciseDecimal( scale * 100 ) )
         .blur(); // To Do -> Provoca que se vuelva a invocar el evento al dar a intro
 
 });
@@ -292,12 +330,12 @@ win
 zone
 .on( 'mousewheel', function( e, d, x, y ){
 
-  var zoom    = wz.app.storage('zoom');
+  var zoom2    = zoom;
   var scrollX = 0;
   var scrollY = 0;
   var resize  = ( this.scrollWidth - this.offsetWidth ) || ( this.scrollHeight - this.offsetHeight );
 
-  if( resize || wz.app.storage('zoom') === -1 ){
+  if( resize || zoom === -1 ){
 
     /*
      *
@@ -323,7 +361,7 @@ zone
   }
 
   // Si no se comprueba el zoom se pueden emular desplazamientos, esto lo previene
-  if( zoom !== wz.app.storage('zoom') ){
+  if( zoom2 !== zoom ){
 
       if( resize || zoom === -1 ){
 
@@ -361,8 +399,8 @@ var toggleFullscreen = function(){
 
         normalWidth  = win.width();
         normalHeight = win.height();
-        normalScale  = wz.app.storage( 'scale' );
-        normalZoom   = wz.app.storage( 'zoom' );
+        normalScale  = scale;
+        normalZoom   = zoom;
 
     }
 
@@ -397,7 +435,7 @@ win
     hideControls();
 
     _scaleImage( screen.width / parseInt( imageLoaded.metadata.exif.imageWidth, 10 ) );
-    zoom.val( _preciseDecimal( screen.width / parseInt( imageLoaded.metadata.exif.imageWidth, 10 ) * 100 ) );
+    zoomUi.val( _preciseDecimal( screen.width / parseInt( imageLoaded.metadata.exif.imageWidth, 10 ) * 100 ) );
     console.log(normalScale);
 
 })
@@ -413,8 +451,8 @@ win
 
     console.log(normalScale);
     _scaleImage( normalScale );
-    wz.app.storage( 'zoom' , normalZoom );
-    zoom.val( _preciseDecimal( normalScale * 100 ) );
+    zoom = normalZoom;
+    zoomUi.val( _preciseDecimal( normalScale * 100 ) );
 
 })
 
@@ -444,12 +482,12 @@ win
   if( pictures.length === 1 ){
 
   }else{
-    if( index > 0 ){
-      index--;
-      _loadImage(pictures[index]);
+    if( picIndex > 0 ){
+      picIndex--;
+      _loadImage(pictures[picIndex]);
     }else{
-      index = pictures.length - 1;
-      _loadImage(pictures[index]);
+      picIndex = pictures.length - 1;
+      _loadImage(pictures[picIndex]);
     }
   }
 
@@ -460,25 +498,15 @@ win
   if( pictures.length === 1 ){
 
   }else{
-    if( index < pictures.length - 1 ){
-      index++;
-      _loadImage(pictures[index]);
+    if( picIndex < pictures.length - 1 ){
+      picIndex++;
+      _loadImage(pictures[picIndex]);
     }else{
-      index = 0;
-      _loadImage(pictures[index]);
+      picIndex = 0;
+      _loadImage(pictures[picIndex]);
     }
   }
 
 });
 
-// Start load
-if( location.host.indexOf('file') === -1 ){
-
-  win.deskitemX( parseInt( ( wz.tool.desktopWidth() - win.width() ) / 2, 10 ) );
-  win.deskitemY( parseInt( ( wz.tool.desktopHeight() - win.height() ) / 2, 10 ) );
-
-}else{
-  wz.app.maximizeView( win );
-}
-
-_loadImage( pictures[index] );
+_startApp();

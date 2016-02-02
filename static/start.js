@@ -1,6 +1,8 @@
 
 // Constant
-var VIEW_MARGIN = 50;
+var view_margin = 50;
+var ui_height = 92;
+
 
 // Local variables
 var win      = $( this );
@@ -12,93 +14,43 @@ var pictures = [];
 // Load structure
 if( params && params.command === 'openFile' ){
 
-    // To Do -> Error
-    var initialIndex = params.list.indexOf( params.data );
+  wz.fs( params.data, function( error, structure ){
 
-    params.list.forEach( function(item, index){
+    var width       = parseInt( structure.metadata.exif.imageWidth, 10 );
+    var height      = parseInt( structure.metadata.exif.imageHeight, 10 );
+    var widthRatio  = width / ( wz.tool.desktopWidth() - ( view_margin * 2 ) );
+    var heightRatio = height / ( wz.tool.desktopHeight() - ( view_margin * 2 ) );
 
-      if( index !== initialIndex){
+    if( widthRatio > 1 || heightRatio > 1 ){
 
-        wz.fs( item, function( error, structure ){
+        if( widthRatio >= heightRatio ){
 
-          if( !error ){
-            if( structure.mime.indexOf('image') !== -1 ){
-              pictures.push( structure );
-            }
-          }
+            width  = wz.tool.desktopWidth() - ( view_margin * 2 );
+            height = height / widthRatio;
 
-          if( index == params.list.length - 1 ){
+        }else{
 
-            wz.app.storage( 'pictures', pictures );
-            wz.app.storage( 'index', picIndex )
-            wz.app.storage( 'zoom', -1 );
-            win.addClass('dark');
-            win.css({'background':'#2c3238'});
-            $('.weevisor-content').css({'background':'#3f4750'});
+            width  = width / heightRatio;
+            height = wz.tool.desktopHeight() - ( view_margin * 2 );
 
-            start();
+        }
 
-          }
+    }
 
-        });
+    if( location.host.indexOf('file') === -1 ){
 
-      }else{
+      //wz.fit( win, width - uiImages.width(), height - uiImages.height() );
+      win.css({
+        'width'   : width + 'px',
+        'height'  : height + ui_height/2 + 'px'
+      });
 
-        wz.fs( item, function( error, structure ){
+    }
 
-            picIndex = pictures.length;
-            pictures.push(structure);
+    win.addClass('dark');
+    win.css({'background':'#2c3238'});
+    $('.weevisor-content').css({'background':'#3f4750'});
+    start();
 
-            var width       = parseInt( structure.metadata.exif.imageWidth, 10 );
-            var height      = parseInt( structure.metadata.exif.imageHeight, 10 );
-            var widthRatio  = width / ( wz.tool.desktopWidth() - ( VIEW_MARGIN * 2 ) );
-            var heightRatio = height / ( wz.tool.desktopHeight() - ( VIEW_MARGIN * 2 ) );
-
-            if( widthRatio > 1 || heightRatio > 1 ){
-
-                if( widthRatio >= heightRatio ){
-
-                    width  = wz.tool.desktopWidth() - ( VIEW_MARGIN * 2 );
-                    height = height / widthRatio;
-
-                }else{
-
-                    width  = width / heightRatio;
-                    height = wz.tool.desktopHeight() - ( VIEW_MARGIN * 2 );
-
-                }
-
-            }
-
-            wz.app.storage( 'horizontal', width >= height );
-
-            if( location.host.indexOf('file') === -1 ){
-
-              //wz.fit( win, width - uiImages.width(), height - uiImages.height() );
-              win.css({
-                'width'   : width + 'px',
-                'height'  : height + 'px'
-              });
-
-            }
-
-            if( index == params.list.length - 1 ){
-
-              wz.app.storage( 'pictures', pictures );
-              wz.app.storage( 'index', picIndex )
-              wz.app.storage( 'zoom', -1 );
-              win.addClass('dark');
-              win.css({'background':'#2c3238'});
-              $('.weevisor-content').css({'background':'#3f4750'});
-
-              start();
-
-            }
-
-        });
-
-      }
-
-    });
-
+  });
 }
