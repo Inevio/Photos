@@ -18,11 +18,10 @@ var normalZoom        = -1;
 var pictures          = [];
 var picIndex          = -1;
 var horizontal        = true;
+var lastFile          = false;
 var zoom;
 var imageLoaded;
 var scale;
-var lastFile          = false;
-
 
 var menuHeight = $( '.wz-view-menu', win ).outerHeight();
 
@@ -158,7 +157,6 @@ var _scaleButton = function( dir ){
 
       zoom = i ;
       _scaleImage( validZoom[ zoom ] );
-      console.log( zoom, validZoom[zoom] , scale );
       zoomUi.val( _preciseDecimal( scale * 100 ) );
 
   }else if( validZoom[ zoom + dir ] && !win.hasClass('fullscreen') ){
@@ -184,7 +182,6 @@ var _scaleButton = function( dir ){
       }
 
       _scaleImage( newZoom );
-      console.log( newZoom, validZoom[zoom] , scale );
       zoomUi.val( _preciseDecimal( scale * 100 ) );
 
   }
@@ -480,8 +477,6 @@ win
 .key( 'left, pageup', function(){
 
   if( pictures.length === 1 ){
-
-  }else{
     if( picIndex > 0 ){
       picIndex--;
       _loadImage(pictures[picIndex]);
@@ -495,9 +490,7 @@ win
 
 .key( 'right, pagedown', function(){
 
-  if( pictures.length === 1 ){
-
-  }else{
+  if( pictures.length !== 1 ){
     if( picIndex < pictures.length - 1 ){
       picIndex++;
       _loadImage(pictures[picIndex]);
