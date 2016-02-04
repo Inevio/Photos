@@ -1,13 +1,16 @@
 
 // Variables
 var win               = $( this );
-var minus             = $( '.weevisor-zoom-minus', win );
-var plus              = $( '.weevisor-zoom-plus', win );
+var minus             = $( '.ui-footer .zoom-minus', win );
+var plus              = $( '.ui-footer .zoom-plus', win );
+var original          = $( '.ui-footer .zoom-original', win );
 var zone              = $( '.weevisor-images', win );
 var zoomUi            = $( '.weevisor-zoom', win );
 var imgDom            = $( '.weevisor-images img', win);
 var uiBarTop          = $('.ui-header');
 var loader            = $('.weevisor-images .loader');
+var prevBtn           = $('.ui-footer .prev-btn');
+var nextBtn           = $('.ui-footer .next-btn');
 var isWebKit          = /webkit/i.test( navigator.userAgent );
 var view_margin       = 50;
 var prevClientX       = 0;
@@ -42,7 +45,6 @@ var _startApp = function(){
     $( '.weevisor-images img').on( 'load', function(){
 
       if (this.complete){
-        console.log('cargo2');
         imgDom.css('visibility', 'visible');
         loader.hide();
       }
@@ -103,9 +105,7 @@ var _loadImage = function( file ){
 
   zoom = -1;
   _scaleImage( scale );
-  zoomUi.val( _preciseDecimal( scale * 100 ) );
 
-  console.log('cargo');
   $( '.weevisor-images img').attr( 'src', file.thumbnails.original );
 
 };
@@ -121,6 +121,8 @@ var _scaleImage = function( scaleArg ){
   $( 'img', zone )
       .width( parseInt( scale * imageLoaded.metadata.exif.imageWidth, 10 ) )
       .height( parseInt( scale * imageLoaded.metadata.exif.imageHeight, 10 ) );
+
+  zoomUi.val( _preciseDecimal( scale * 100 ) );
 
   _marginImage();
   _detectCursor();
@@ -210,8 +212,161 @@ var _detectCursor = function(){
 
 };
 
-// Events
+/* fullscreen mode */
+var toggleFullscreen = function(){
+
+    if( win.hasClass( 'fullscreen' ) ){
+
+        wz.tool.exitFullscreen();
+
+    }else{
+
+        if( win[ 0 ].requestFullScreen ){
+            win[ 0 ].requestFullScreen();
+        }else if( win[ 0 ].webkitRequestFullScreen ){
+            win[ 0 ].webkitRequestFullScreen();
+        }else if( win[ 0 ].mozRequestFullScreen ){
+            win[ 0 ].mozRequestFullScreen();
+        }else{
+            alert( lang.fullscreenSupport );
+        }
+
+        normalWidth  = win.width();
+        normalHeight = win.height();
+        normalScale  = scale;
+        normalZoom   = zoom;
+
+    }
+
+};
+
+var showControls = function(){
+
+    uiBarTop.stop().clearQueue();
+    uiBarTop.css( 'display', 'block' );
+
+};
+
+var hideControls = function(){
+
+    uiBarTop.stop().clearQueue();
+    uiBarTop.css( 'display' , 'none' );
+
+};
+
 win
+.on( 'click', '.ui-fullscreen', function(){
+    toggleFullscreen();
+})
+
+.on('click', '.ui-footer .prev-btn', function(){
+
+  if( pictures.length !== 1 ){
+
+    imgDom.css('visibility', 'hidden');
+    loader.show();
+
+    if( picIndex > 0 ){
+      picIndex--;
+      _loadImage(pictures[picIndex]);
+    }else{
+      picIndex = pictures.length - 1;
+      _loadImage(pictures[picIndex]);
+    }
+  }
+
+})
+
+.on('click', '.ui-footer .next-btn', function(){
+
+  if( pictures.length !== 1 ){
+
+    imgDom.css('visibility', 'hidden');
+    loader.show();
+
+    if( picIndex < pictures.length - 1 ){
+      picIndex++;
+      _loadImage(pictures[picIndex]);
+    }else{
+      picIndex = 0;
+      _loadImage(pictures[picIndex]);
+    }
+  }
+
+})
+
+.on( 'enterfullscreen', function(){
+
+    win.addClass('fullscreen');
+
+    win.css( 'width', screen.width );
+    win.css( 'height', screen.height );
+
+    hideControls();
+
+    _scaleImage( screen.width / parseInt( imageLoaded.metadata.exif.imageWidth, 10 ) );
+    zoomUi.val( _preciseDecimal( screen.width / parseInt( imageLoaded.metadata.exif.imageWidth, 10 ) * 100 ) );
+    console.log(normalScale);
+
+})
+
+.on( 'exitfullscreen', function(){
+
+    win.removeClass('fullscreen');
+
+    win.css( 'width', normalWidth );
+    win.css( 'height', normalHeight );
+
+    showControls();
+
+    console.log(normalScale);
+    _scaleImage( normalScale );
+    zoom = normalZoom;
+    zoomUi.val( _preciseDecimal( normalScale * 100 ) );
+
+})
+
+.on( 'ui-view-maximize', function(){
+    win.addClass( 'maximized' );
+})
+
+.on( 'ui-view-unmaximize', function(){
+    win.removeClass( 'maximized' );
+})
+
+.on( 'mousemove', function( e ){
+
+    if( e.clientX !== prevClientX || e.clientY !== prevClientY ){
+
+        prevClientX = e.clientX;
+        prevClientY = e.clientY;
+
+        clearTimeout( 0 );
+
+    }
+
+})
+
+.key( 'left, pageup', function(){
+
+  prevBtn.click();
+
+})
+
+.key( 'right, pagedown', function(){
+
+  nextBtn.click();
+
+})
+
+.key( 'numadd', function(){
+    plus.click();
+})
+
+.key( 'numsubtract', function(){
+    minus.click();
+})
+
 .on( 'ui-view-resize ui-view-maximize ui-view-unmaximize', function(){
 
   _marginImage();
@@ -261,6 +416,13 @@ minus
             .scrollTop( scrollY );
 
     }
+
+});
+
+original.on('click', function(){
+
+  _scaleImage(1);
+  zoom = 13;
 
 });
 
@@ -325,15 +487,6 @@ zoomUi
 
 });
 
-win
-.key( 'numadd', function(){
-    plus.click();
-})
-
-.key( 'numsubtract', function(){
-    minus.click();
-});
-
 zone
 .on( 'mousewheel', function( e, d, x, y ){
 
@@ -381,141 +534,6 @@ zone
         .scrollLeft( scrollX )
         .scrollTop( scrollY );
 
-  }
-
-});
-
-/* fullscreen mode */
-var toggleFullscreen = function(){
-
-    if( win.hasClass( 'fullscreen' ) ){
-
-        wz.tool.exitFullscreen();
-
-    }else{
-
-        if( win[ 0 ].requestFullScreen ){
-            win[ 0 ].requestFullScreen();
-        }else if( win[ 0 ].webkitRequestFullScreen ){
-            win[ 0 ].webkitRequestFullScreen();
-        }else if( win[ 0 ].mozRequestFullScreen ){
-            win[ 0 ].mozRequestFullScreen();
-        }else{
-            alert( lang.fullscreenSupport );
-        }
-
-        normalWidth  = win.width();
-        normalHeight = win.height();
-        normalScale  = scale;
-        normalZoom   = zoom;
-
-    }
-
-};
-
-var showControls = function(){
-
-    uiBarTop.stop().clearQueue();
-    uiBarTop.css( 'display', 'block' );
-
-};
-
-var hideControls = function(){
-
-    uiBarTop.stop().clearQueue();
-    uiBarTop.css( 'display' , 'none' );
-
-};
-
-win
-.on( 'click', '.ui-fullscreen', function(){
-    toggleFullscreen();
-})
-
-.on( 'enterfullscreen', function(){
-
-    win.addClass('fullscreen');
-
-    win.css( 'width', screen.width );
-    win.css( 'height', screen.height );
-
-    hideControls();
-
-    _scaleImage( screen.width / parseInt( imageLoaded.metadata.exif.imageWidth, 10 ) );
-    zoomUi.val( _preciseDecimal( screen.width / parseInt( imageLoaded.metadata.exif.imageWidth, 10 ) * 100 ) );
-    console.log(normalScale);
-
-})
-
-.on( 'exitfullscreen', function(){
-
-    win.removeClass('fullscreen');
-
-    win.css( 'width', normalWidth );
-    win.css( 'height', normalHeight );
-
-    showControls();
-
-    console.log(normalScale);
-    _scaleImage( normalScale );
-    zoom = normalZoom;
-    zoomUi.val( _preciseDecimal( normalScale * 100 ) );
-
-})
-
-.on( 'ui-view-maximize', function(){
-    win.addClass( 'maximized' );
-})
-
-.on( 'ui-view-unmaximize', function(){
-    win.removeClass( 'maximized' );
-})
-
-.on( 'mousemove', function( e ){
-
-    if( e.clientX !== prevClientX || e.clientY !== prevClientY ){
-
-        prevClientX = e.clientX;
-        prevClientY = e.clientY;
-
-        clearTimeout( 0 );
-
-    }
-
-})
-
-.key( 'left, pageup', function(){
-
-  if( pictures.length !== 1 ){
-
-    imgDom.css('visibility', 'hidden');
-    loader.show();
-
-    if( picIndex > 0 ){
-      picIndex--;
-      _loadImage(pictures[picIndex]);
-    }else{
-      picIndex = pictures.length - 1;
-      _loadImage(pictures[picIndex]);
-    }
-  }
-
-})
-
-.key( 'right, pagedown', function(){
-
-  if( pictures.length !== 1 ){
-
-    imgDom.css('visibility', 'hidden');
-    loader.show();
-
-    if( picIndex < pictures.length - 1 ){
-      picIndex++;
-      _loadImage(pictures[picIndex]);
-    }else{
-      picIndex = 0;
-      _loadImage(pictures[picIndex]);
-    }
   }
 
 });
