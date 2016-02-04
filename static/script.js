@@ -41,25 +41,10 @@ var _startApp = function(){
 
     $( '.weevisor-images img').on( 'load', function(){
 
-      var that = this;
-
-      var d1 = new Date();
-
-      var intervalo = setInterval( function(){
-
-        var d2 = new Date();
-        console.log(Math.abs(d2-d1));
-
-        if(that.complete){
-
-          console.log('cargo',that.complete);
-          loader.hide();
-          imgDom.css('visibility', 'visible');
-          clearInterval(intervalo);
-
-        }
-
-      },1320);
+      if (this.complete){
+        console.log('cargo2');
+        imgDom.css('visibility', 'visible');
+      }
 
     });
 
@@ -503,7 +488,7 @@ win
   if( pictures.length !== 1 ){
 
     imgDom.css('visibility', 'hidden');
-    loader.show();
+    //loader.show();
 
     if( picIndex > 0 ){
       picIndex--;
@@ -521,7 +506,7 @@ win
   if( pictures.length !== 1 ){
 
     imgDom.css('visibility', 'hidden');
-    loader.show();
+    //loader.show();
 
     if( picIndex < pictures.length - 1 ){
       picIndex++;
