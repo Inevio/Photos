@@ -164,6 +164,21 @@
 
 .weevisor-images img{
     display: inline-block;
+    z-index: 2;
+    position: relative;
+}
+
+.weevisor-images .loader{
+  width: 360px;
+  height: 290px;
+  background-image: url('@static/loader.gif');
+  display: inline-block;
+  position: absolute;
+  top: ~"calc(50% - 145px)";
+  left: ~"calc(50% - 180px)";
+  background-size: 360px 290px;
+  z-index: 1;
+  display: none;
 }
 
 .weevisor-images.hide-hand, .weevisor-images.hide-hand *{

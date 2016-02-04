@@ -5,7 +5,9 @@ var minus             = $( '.weevisor-zoom-minus', win );
 var plus              = $( '.weevisor-zoom-plus', win );
 var zone              = $( '.weevisor-images', win );
 var zoomUi            = $( '.weevisor-zoom', win );
+var imgDom            = $( '.weevisor-images img', win);
 var uiBarTop          = $('.ui-header');
+var loader            = $('.weevisor-images .loader');
 var isWebKit          = /webkit/i.test( navigator.userAgent );
 var view_margin       = 50;
 var prevClientX       = 0;
@@ -36,6 +38,30 @@ var _preciseDecimal = function( number ){
 var _startApp = function(){
 
   if( params && params.command === 'openFile' ){
+
+    $( '.weevisor-images img').on( 'load', function(){
+
+      var that = this;
+
+      var d1 = new Date();
+
+      var intervalo = setInterval( function(){
+
+        var d2 = new Date();
+        console.log(Math.abs(d2-d1));
+
+        if(that.complete){
+
+          console.log('cargo',that.complete);
+          loader.hide();
+          imgDom.css('visibility', 'visible');
+          clearInterval(intervalo);
+
+        }
+
+      },1320);
+
+    });
 
     // To Do -> Error
     var initialIndex = params.list.indexOf( params.data );
@@ -93,10 +119,8 @@ var _loadImage = function( file ){
   _scaleImage( scale );
   zoomUi.val( _preciseDecimal( scale * 100 ) );
 
-  $( '.weevisor-images img')
-    .attr( 'src', file.thumbnails.original )
-    .on( 'load', function(){
-    });
+  console.log('cargo');
+  $( '.weevisor-images img').attr( 'src', file.thumbnails.original );
 
 };
 
@@ -476,7 +500,11 @@ win
 
 .key( 'left, pageup', function(){
 
-  if( pictures.length === 1 ){
+  if( pictures.length !== 1 ){
+
+    imgDom.css('visibility', 'hidden');
+    loader.show();
+
     if( picIndex > 0 ){
       picIndex--;
       _loadImage(pictures[picIndex]);
@@ -491,6 +519,10 @@ win
 .key( 'right, pagedown', function(){
 
   if( pictures.length !== 1 ){
+
+    imgDom.css('visibility', 'hidden');
+    loader.show();
+
     if( picIndex < pictures.length - 1 ){
       picIndex++;
       _loadImage(pictures[picIndex]);
