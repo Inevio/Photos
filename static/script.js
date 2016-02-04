@@ -44,6 +44,7 @@ var _startApp = function(){
       if (this.complete){
         console.log('cargo2');
         imgDom.css('visibility', 'visible');
+        loader.hide();
       }
 
     });
@@ -488,7 +489,7 @@ win
   if( pictures.length !== 1 ){
 
     imgDom.css('visibility', 'hidden');
-    //loader.show();
+    loader.show();
 
     if( picIndex > 0 ){
       picIndex--;
@@ -506,7 +507,7 @@ win
   if( pictures.length !== 1 ){
 
     imgDom.css('visibility', 'hidden');
-    //loader.show();
+    loader.show();
 
     if( picIndex < pictures.length - 1 ){
       picIndex++;
