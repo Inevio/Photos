@@ -11,6 +11,9 @@ var uiBarTop          = $('.ui-header');
 var loader            = $('.weevisor-images .loader');
 var prevBtn           = $('.ui-footer .prev-btn');
 var nextBtn           = $('.ui-footer .next-btn');
+var presentationBtn   = $('.presentation-buttons .presentation');
+var presentationMode  = false;
+var presInterval;
 var isWebKit          = /webkit/i.test( navigator.userAgent );
 var view_margin       = 50;
 var prevClientX       = 0;
@@ -45,8 +48,20 @@ var _startApp = function(){
     $( '.weevisor-images img').on( 'load', function(){
 
       if (this.complete){
+
         imgDom.css('visibility', 'visible');
         loader.hide();
+
+        if( presentationMode && win.hasClass('fullscreen') ){
+
+          presInterval = setTimeout( function(){
+            if(presentationMode){
+              nextBtn.click();
+            }
+          }, 4000);
+
+        }
+
       }
 
     });
@@ -104,6 +119,8 @@ var _loadImage = function( file ){
   }
 
   zoom = -1;
+  normalZoom = -1;
+  normalScale = scale;
   _scaleImage( scale );
 
   $( '.weevisor-images img').attr( 'src', file.thumbnails.original );
@@ -217,24 +234,24 @@ var toggleFullscreen = function(){
 
     if( win.hasClass( 'fullscreen' ) ){
 
-        wz.tool.exitFullscreen();
+      wz.tool.exitFullscreen();
 
     }else{
 
-        if( win[ 0 ].requestFullScreen ){
-            win[ 0 ].requestFullScreen();
-        }else if( win[ 0 ].webkitRequestFullScreen ){
-            win[ 0 ].webkitRequestFullScreen();
-        }else if( win[ 0 ].mozRequestFullScreen ){
-            win[ 0 ].mozRequestFullScreen();
-        }else{
-            alert( lang.fullscreenSupport );
-        }
+      if( win[ 0 ].requestFullScreen ){
+          win[ 0 ].requestFullScreen();
+      }else if( win[ 0 ].webkitRequestFullScreen ){
+          win[ 0 ].webkitRequestFullScreen();
+      }else if( win[ 0 ].mozRequestFullScreen ){
+          win[ 0 ].mozRequestFullScreen();
+      }else{
+          alert( lang.fullscreenSupport );
+      }
 
-        normalWidth  = win.width();
-        normalHeight = win.height();
-        normalScale  = scale;
-        normalZoom   = zoom;
+      normalWidth  = win.width();
+      normalHeight = win.height();
+      normalScale  = scale;
+      normalZoom   = zoom;
 
     }
 
@@ -298,28 +315,50 @@ win
 .on( 'enterfullscreen', function(){
 
     win.addClass('fullscreen');
+    loader.addClass('fullscreen');
 
     win.css( 'width', screen.width );
     win.css( 'height', screen.height );
 
-    hideControls();
+    var width  = parseInt( imageLoaded.metadata.exif.imageWidth, 10 );
+    var height = parseInt( imageLoaded.metadata.exif.imageHeight, 10 );
 
-    _scaleImage( screen.width / parseInt( imageLoaded.metadata.exif.imageWidth, 10 ) );
-    zoomUi.val( _preciseDecimal( screen.width / parseInt( imageLoaded.metadata.exif.imageWidth, 10 ) * 100 ) );
-    console.log(normalScale);
+    var scale1 = screen.width / width ;
+    var scale2 = screen.height / height ;
+
+    if( scale1 < scale2 ){
+      scale = scale1;
+    }else{
+      scale = scale2;
+    }
+
+    if( scale > 1 ){
+      scale = 1;
+    }
+
+    zoom = -1;
+
+    hideControls();
+    _scaleImage( scale );
+    zoomUi.val( scale * 100 );
 
 })
 
 .on( 'exitfullscreen', function(){
 
+    if( presentationMode ){
+      //clearInterval(presInterval);
+      presentationMode=false;
+    }
+
     win.removeClass('fullscreen');
+    loader.removeClass('fullscreen');
 
     win.css( 'width', normalWidth );
     win.css( 'height', normalHeight );
 
     showControls();
 
-    console.log(normalScale);
     _scaleImage( normalScale );
     zoom = normalZoom;
     zoomUi.val( _preciseDecimal( normalScale * 100 ) );
@@ -535,6 +574,17 @@ zone
         .scrollTop( scrollY );
 
   }
+
+});
+
+presentationBtn.on('click', function(){
+
+  toggleFullscreen();
+  presentationMode = true;
+  presInterval = setTimeout( function(){
+    nextBtn.click();
+  }, 3000);
+
 
 });
 
