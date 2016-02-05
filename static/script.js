@@ -75,7 +75,8 @@ var _startApp = function(){
       wz.fs( item, function( error, structure ){
 
         if( !error ){
-          if( structure.mime.indexOf('image') !== -1 ){
+          if( structure.mime.indexOf('image/gif') !== -1 || structure.mime.indexOf('image/jpeg') !== -1
+              || structure.mime.indexOf('image/png') !== -1 || structure.mime.indexOf('image/tiff') !== -1 ){
 
             pictures[ newIndex ] = structure;
 
