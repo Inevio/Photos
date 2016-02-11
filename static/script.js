@@ -463,6 +463,7 @@ original.on('click', function(){
 
   _scaleImage(1);
   zoom = 13;
+  zone.scrollLeft( imgDom.width() / 2 - zone.width() / 2 ).scrollTop( imgDom.height() / 2 - zone.height() / 2 );
 
 });
 
