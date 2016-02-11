@@ -100,7 +100,7 @@ var _startApp = function(){
 
 var _loadImage = function( file ){
 
-  $( '.weevisor-title', win ).text( file.name );
+  $( '.ui-header-brand span', win ).text( file.name );
   imageLoaded = file;
 
   var width  = parseInt( file.metadata.exif.imageWidth, 10 );
