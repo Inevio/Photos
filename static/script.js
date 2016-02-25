@@ -302,6 +302,10 @@ win
     imgDom.css('visibility', 'hidden');
     loader.show();
 
+    if( presentationMode ){
+      clearTimeout( presInterval );
+    }
+
     if( picIndex < pictures.length - 1 ){
       picIndex++;
       _loadImage(pictures[picIndex]);
