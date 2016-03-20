@@ -74,9 +74,15 @@ var _startApp = function(){
 
       wz.fs( item, function( error, structure ){
 
-        if( !error ){
-          if( structure.mime.indexOf('image/gif') !== -1 || structure.mime.indexOf('image/jpeg') !== -1
-              || structure.mime.indexOf('image/png') !== -1 || structure.mime.indexOf('image/tiff') !== -1 ){
+        if( error ){
+          return;
+        }
+
+        if( [ 'image/gif', 'image/jpeg', 'image/png', 'image/tiff' ].indexOf( structure.mime ) !== -1 ){
+
+          structure.getFormats( function( error, formats ){
+
+            structure.formats = formats;
 
             pictures[ newIndex ] = structure;
 
@@ -88,12 +94,15 @@ var _startApp = function(){
             }
 
             newIndex++;
-          }
+
+          });
+
         }
 
       });
 
     });
+
   }
 
 }
@@ -103,8 +112,8 @@ var _loadImage = function( file ){
   $( '.ui-header-brand span', win ).text( file.name );
   imageLoaded = file;
 
-  var width  = parseInt( file.metadata.exif.imageWidth, 10 );
-  var height = parseInt( file.metadata.exif.imageHeight, 10 );
+  var width  = parseInt( file.formats.original.metadata.exif.imageWidth, 10 );
+  var height = parseInt( file.formats.original.metadata.exif.imageHeight, 10 );
 
   var scale1 = zone.width() / width ;
   var scale2 = zone.height() / height ;
@@ -124,7 +133,7 @@ var _loadImage = function( file ){
   normalScale = scale;
   _scaleImage( scale );
 
-  $( '.weevisor-images img').attr( 'src', file.thumbnails.original );
+  $( '.weevisor-images img').attr( 'src', file.formats.original.url );
 
 };
 
@@ -137,8 +146,8 @@ var _scaleImage = function( scaleArg ){
   }
 
   $( 'img', zone )
-      .width( parseInt( scale * imageLoaded.metadata.exif.imageWidth, 10 ) )
-      .height( parseInt( scale * imageLoaded.metadata.exif.imageHeight, 10 ) );
+      .width( parseInt( scale * imageLoaded.formats.original.metadata.exif.imageWidth, 10 ) )
+      .height( parseInt( scale * imageLoaded.formats.original.metadata.exif.imageHeight, 10 ) );
 
   zoomUi.val( _preciseDecimal( scale * 100 ) );
 
@@ -325,8 +334,8 @@ win
     win.css( 'width', screen.width );
     win.css( 'height', screen.height );
 
-    var width  = parseInt( imageLoaded.metadata.exif.imageWidth, 10 );
-    var height = parseInt( imageLoaded.metadata.exif.imageHeight, 10 );
+    var width  = parseInt( imageLoaded.formats.original.metadata.exif.imageWidth, 10 );
+    var height = parseInt( imageLoaded.formats.original.metadata.exif.imageHeight, 10 );
 
     var scale1 = screen.width / width ;
     var scale2 = screen.height / height ;

@@ -16,41 +16,49 @@ if( params && params.command === 'openFile' ){
 
   wz.fs( params.data, function( error, structure ){
 
-    var width       = parseInt( structure.metadata.exif.imageWidth, 10 );
-    var height      = parseInt( structure.metadata.exif.imageHeight, 10 );
-    var widthRatio  = width / ( wz.tool.desktopWidth() - ( view_margin * 2 ) );
-    var heightRatio = height / ( wz.tool.desktopHeight() - ( view_margin * 2 ) );
+    structure.getFormats( function( error, formats ){
 
-    if( widthRatio > 1 || heightRatio > 1 ){
+        structure.formats = formats;
 
-        if( widthRatio >= heightRatio ){
+        var metadata    = structure.formats.original.metadata;
+        var width       = parseInt( metadata.exif.imageWidth, 10 );
+        var height      = parseInt( metadata.exif.imageHeight, 10 );
+        var widthRatio  = width / ( wz.tool.desktopWidth() - ( view_margin * 2 ) );
+        var heightRatio = height / ( wz.tool.desktopHeight() - ( view_margin * 2 ) );
 
-            width  = wz.tool.desktopWidth() - ( view_margin * 2 );
-            height = height / widthRatio;
+        if( widthRatio > 1 || heightRatio > 1 ){
 
-        }else{
+            if( widthRatio >= heightRatio ){
 
-            width  = width / heightRatio;
-            height = wz.tool.desktopHeight() - ( view_margin * 2 );
+                width  = wz.tool.desktopWidth() - ( view_margin * 2 );
+                height = height / widthRatio;
+
+            }else{
+
+                width  = width / heightRatio;
+                height = wz.tool.desktopHeight() - ( view_margin * 2 );
+
+            }
 
         }
 
-    }
+        if( location.host.indexOf('file') === -1 ){
 
-    if( location.host.indexOf('file') === -1 ){
+          //wz.fit( win, width - uiImages.width(), height - uiImages.height() );
+          win.css({
+            'width'   : width + 'px',
+            'height'  : height + ui_height/2 + 'px'
+          });
 
-      //wz.fit( win, width - uiImages.width(), height - uiImages.height() );
-      win.css({
-        'width'   : width + 'px',
-        'height'  : height + ui_height/2 + 'px'
-      });
+        }
 
-    }
+        win.addClass('dark');
+        win.css({'background':'#2c3238'});
+        $('.weevisor-content').css({'background':'#3f4750'});
+        start();
 
-    win.addClass('dark');
-    win.css({'background':'#2c3238'});
-    $('.weevisor-content').css({'background':'#3f4750'});
-    start();
+    });
 
   });
+
 }
