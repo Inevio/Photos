@@ -37,15 +37,10 @@ if( params && params.command === 'openFile' ){
 
     }
 
-    if( location.host.indexOf('file') === -1 ){
-
-      //wz.fit( win, width - uiImages.width(), height - uiImages.height() );
-      win.css({
-        'width'   : width + 'px',
-        'height'  : height + ui_height/2 + 'px'
-      });
-
-    }
+    win.css({
+      'width'   : width + 'px',
+      'height'  : height + ui_height/2 + 'px'
+    });
 
     win.addClass('dark');
     win.css({'background':'#2c3238'});
