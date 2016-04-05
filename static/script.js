@@ -72,7 +72,7 @@ var _startApp = function(){
 
     params.list.forEach( function(item, index){
 
-      wz.fs( item, function( error, structure ){
+      api.fs( item, function( error, structure ){
 
         if( !error ){
           if( structure.mime.indexOf('image/gif') !== -1 || structure.mime.indexOf('image/jpeg') !== -1
@@ -235,7 +235,7 @@ var toggleFullscreen = function(){
 
     if( win.hasClass( 'fullscreen' ) ){
 
-      wz.tool.exitFullscreen();
+      api.tool.exitFullscreen();
 
     }else{
 
