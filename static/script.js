@@ -594,4 +594,8 @@ presentationBtn.on('click', function(){
 
 });
 
+if( location.host.indexOf('file') !== -1 ){
+  api.app.maximizeView( win );
+}
+
 _startApp();
