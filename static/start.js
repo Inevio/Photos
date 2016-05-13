@@ -11,6 +11,12 @@ var uiImages = $('.weevisor-images');
 var picIndex = -1;
 var pictures = [];
 
+var params = {
+  'command' : 'openFile',
+  'data' : 2283920,
+  'list' : [2283920]
+}
+
 // Load structure
 if( params && params.command === 'openFile' ){
 
