@@ -14,8 +14,10 @@ var pictures = [];
 var params = {
   'command' : 'openFile',
   'data' : 2283920,
-  'list' : [2283920]
+  'list' : [2283920,2283702]
 }
+
+var mobile = true;
 
 // Load structure
 if( params && params.command === 'openFile' ){
@@ -24,29 +26,36 @@ if( params && params.command === 'openFile' ){
 
     var width       = parseInt( structure.metadata.exif.imageWidth, 10 );
     var height      = parseInt( structure.metadata.exif.imageHeight, 10 );
-    var widthRatio  = width / ( wz.tool.desktopWidth() - ( view_margin * 2 ) );
-    var heightRatio = height / ( wz.tool.desktopHeight() - ( view_margin * 2 ) );
 
-    if( widthRatio > 1 || heightRatio > 1 ){
+    if( mobile ){
+      var widthRatio  = width / ( 375 );
+      var heightRatio = height / ( 667 + 41 );
+    }else{
+      var widthRatio  = width / ( wz.tool.desktopWidth() - ( view_margin * 2 ) );
+      var heightRatio = height / ( wz.tool.desktopHeight() - ( view_margin * 2 ) );
 
-        if( widthRatio >= heightRatio ){
+      if( widthRatio > 1 || heightRatio > 1 ){
 
-            width  = wz.tool.desktopWidth() - ( view_margin * 2 );
-            height = height / widthRatio;
+          if( widthRatio >= heightRatio ){
 
-        }else{
+              width  = wz.tool.desktopWidth() - ( view_margin * 2 );
+              height = height / widthRatio;
 
-            width  = width / heightRatio;
-            height = wz.tool.desktopHeight() - ( view_margin * 2 );
+          }else{
 
-        }
+              width  = width / heightRatio;
+              height = wz.tool.desktopHeight() - ( view_margin * 2 );
+
+          }
+
+      }
+
+      win.css({
+        'width'   : width + 'px',
+        'height'  : height + ui_height/2 + 'px'
+      });
 
     }
-
-    win.css({
-      'width'   : width + 'px',
-      'height'  : height + ui_height/2 + 'px'
-    });
 
     win.addClass('dark');
     win.css({'background':'#2c3238'});
