@@ -354,3 +354,24 @@
 .presentation-buttons .next-btn i{
   background-image: url('@static/next.png');
 }
+
+.wz-view.mobile{
+
+  border: none;
+  box-shadow: none;
+
+  .weevisor-content{
+   background-color: #f9f9fb;
+  }
+
+  .ui-header{
+    background-color: #ffffff;
+    background-image: none;
+    border-bottom: 1px solid #ececee;
+  }
+
+  .loader:after{
+    background: #f9f9fb;
+  }
+
+}

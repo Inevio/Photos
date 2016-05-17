@@ -28,8 +28,11 @@ if( params && params.command === 'openFile' ){
     var height      = parseInt( structure.metadata.exif.imageHeight, 10 );
 
     if( mobile ){
+
       var widthRatio  = width / ( 375 );
       var heightRatio = height / ( 667 + 41 );
+      win.addClass('mobile');
+
     }else{
       var widthRatio  = width / ( wz.tool.desktopWidth() - ( view_margin * 2 ) );
       var heightRatio = height / ( wz.tool.desktopHeight() - ( view_margin * 2 ) );
@@ -55,11 +58,12 @@ if( params && params.command === 'openFile' ){
         'height'  : height + ui_height/2 + 'px'
       });
 
+      win.addClass('dark');
+      win.css({'background':'#2c3238'});
+      $('.weevisor-content').css({'background':'#3f4750'});
+
     }
 
-    win.addClass('dark');
-    win.css({'background':'#2c3238'});
-    $('.weevisor-content').css({'background':'#3f4750'});
     start();
 
   });

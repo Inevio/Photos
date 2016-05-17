@@ -42,11 +42,9 @@ var params = {
   'list' : [2283920,2283702]
 }
 
-console.log(params);
-
 // Private Methods
 var _preciseDecimal = function( number ){
-    return parseFloat( number.toFixed( 2 ) );
+    return Math.floor(number * 100) / 100;
 };
 
 var _startApp = function(){
@@ -138,7 +136,8 @@ var _loadImage = function( file ){
 
 var _scaleImage = function( scaleArg ){
 
-  scale = _preciseDecimal( parseFloat( scaleArg, 10 ) );
+  //scale = _preciseDecimal( parseFloat( scaleArg, 10 ) );
+  scale = scaleArg;
 
   if( isNaN( scale ) || scale <= 0 || scale > 5 ){
       return false;
