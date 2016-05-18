@@ -398,13 +398,13 @@ win
 
 })
 
-.key( 'left, pageup', function(){
+.key( 'left, pageup, swiperight', function(){
 
   prevBtn.click();
 
 })
 
-.key( 'right, pagedown', function(){
+.key( 'right, pagedown, swipeleft', function(){
 
   nextBtn.click();
 
