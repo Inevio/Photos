@@ -374,4 +374,12 @@
     background: #f9f9fb;
   }
 
+  .ui-footer{
+    display: none;
+  }
+
+  .weevisor-content{
+    height: ~'calc(100% - 41px)';
+  }
+
 }
