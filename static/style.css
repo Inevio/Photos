@@ -50,6 +50,10 @@
   line-height: 1.1em;
 }
 
+.ui-header-mobile{
+  display: none;
+}
+
 .ui-fullscreen i{
   background: url('@static/fullscreen.png');
   background-position: 0px 0;
@@ -364,10 +368,28 @@
    background-color: #f9f9fb;
   }
 
-  .ui-header{
+  .ui-header-desktop{
+    display: none;
+  }
+
+  .ui-header-mobile{
+    display: block;
     background-color: #ffffff;
     background-image: none;
     border-bottom: 1px solid #ececee;
+    text-align: center;
+  }
+
+  .ui-header-mobile .ui-header-brand{
+    float: none;
+    padding-left: 0px;
+    max-width: none;
+  }
+
+  .ui-header-mobile .ui-header-brand span{
+    float: none;
+    font-size: 16px;
+    font-weight: bold;
   }
 
   .loader:after{
