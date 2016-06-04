@@ -41,6 +41,15 @@
   height: 8px;
 }
 
+.ui-header-brand{
+  max-width: ~'calc(100% - 165px)';
+}
+
+.ui-header-brand span{
+  max-width: 100%;
+  line-height: 1.1em;
+}
+
 .ui-fullscreen i{
   background: url('@static/fullscreen.png');
   background-position: 0px 0;

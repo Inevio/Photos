@@ -72,7 +72,7 @@ var _startApp = function(){
 
     params.list.forEach( function(item, index){
 
-      wz.fs( item, function( error, structure ){
+      api.fs( item, function( error, structure ){
 
         if( error ){
           return;
@@ -244,7 +244,7 @@ var toggleFullscreen = function(){
 
     if( win.hasClass( 'fullscreen' ) ){
 
-      wz.tool.exitFullscreen();
+      api.tool.exitFullscreen();
 
     }else{
 
@@ -602,5 +602,9 @@ presentationBtn.on('click', function(){
 
 
 });
+
+if( location.host.indexOf('file') !== -1 ){
+  api.app.maximizeView( win );
+}
 
 _startApp();
