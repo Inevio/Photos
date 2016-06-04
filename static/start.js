@@ -14,43 +14,44 @@ var pictures = [];
 // Load structure
 if( params && params.command === 'openFile' ){
 
-  wz.fs( params.data, function( error, structure ){
+  api.fs( params.data, function( error, structure ){
 
     structure.getFormats( function( error, formats ){
 
-        structure.formats = formats;
 
-        var metadata    = structure.formats.original.metadata;
-        var width       = parseInt( metadata.exif.imageWidth, 10 );
-        var height      = parseInt( metadata.exif.imageHeight, 10 );
-        var widthRatio  = width / ( wz.tool.desktopWidth() - ( view_margin * 2 ) );
-        var heightRatio = height / ( wz.tool.desktopHeight() - ( view_margin * 2 ) );
+      structure.formats = formats;
 
-        if( widthRatio > 1 || heightRatio > 1 ){
+      var metadata    = structure.formats.original.metadata;
+      var width       = parseInt( metadata.exif.imageWidth, 10 );
+      var height      = parseInt( metadata.exif.imageHeight, 10 );
+      var widthRatio  = width / ( api.tool.desktopWidth() - ( view_margin * 2 ) );
+      var heightRatio = height / ( api.tool.desktopHeight() - ( view_margin * 2 ) );
 
-            if( widthRatio >= heightRatio ){
+      if( widthRatio > 1 || heightRatio > 1 ){
 
-                width  = wz.tool.desktopWidth() - ( view_margin * 2 );
-                height = height / widthRatio;
+        if( widthRatio >= heightRatio ){
 
-            }else{
+          width  = api.tool.desktopWidth() - ( view_margin * 2 );
+          height = height / widthRatio;
 
-                width  = width / heightRatio;
-                height = wz.tool.desktopHeight() - ( view_margin * 2 );
+        }else{
 
-            }
+          width  = width / heightRatio;
+          height = api.tool.desktopHeight() - ( view_margin * 2 );
 
         }
 
-        win.css({
-          'width'   : width + 'px',
-          'height'  : height + ui_height/2 + 'px'
-        });
+      }
 
-        win.addClass('dark');
-        win.css({'background':'#2c3238'});
-        $('.weevisor-content').css({'background':'#3f4750'});
-        start();
+      win.css({
+        'width'   : width + 'px',
+        'height'  : height + ui_height/2 + 'px'
+      });
+
+      win.addClass('dark');
+      win.css({'background':'#2c3238'});
+      $('.weevisor-content').css({'background':'#3f4750'});
+      start();
 
     });
 
