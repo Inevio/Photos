@@ -17,7 +17,7 @@ var params = {
   'list' : [2283920,2283702]
 }
 
-var mobile = true;
+var mobile = win.hasClass('mobile');
 
 // Load structure
 if( params && params.command === 'openFile' ){

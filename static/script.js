@@ -398,16 +398,20 @@ win
 
 })
 
-.key( 'left, pageup, swiperight', function(){
-
+.on( 'swiperight', function(){
   prevBtn.click();
-
 })
 
-.key( 'right, pagedown, swipeleft', function(){
-
+.on( 'swipeleft', function(){
   nextBtn.click();
+})
 
+/*.key( 'left, pageup', function(){
+  prevBtn.click();
+})
+
+.key( 'right, pagedown', function(){
+  nextBtn.click();
 })
 
 .key( 'numadd', function(){
@@ -416,7 +420,7 @@ win
 
 .key( 'numsubtract', function(){
     minus.click();
-})
+})*/
 
 .on( 'ui-view-resize ui-view-maximize ui-view-unmaximize', function(){
 
