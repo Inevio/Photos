@@ -17,7 +17,7 @@ var params = {
   'list' : [2283920,2283702]
 }
 
-var mobile = win.hasClass('mobile');
+var mobile = win.hasClass('wz-mobile-view');
 
 // Load structure
 if( params && params.command === 'openFile' ){
@@ -31,7 +31,6 @@ if( params && params.command === 'openFile' ){
 
       var widthRatio  = width / ( 375 );
       var heightRatio = height / ( 667 + 41 );
-      win.addClass('mobile');
 
     }else{
       var widthRatio  = width / ( wz.tool.desktopWidth() - ( view_margin * 2 ) );
