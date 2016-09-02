@@ -36,12 +36,6 @@ var menuHeight = $( '.wz-view-menu', win ).outerHeight();
 // Valid zoom
 var validZoom = [ 0.01, 0.02, 0.03, 0.04, 0.06, 0.08, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.75, 1, 1.5, 2, 3, 4, 5 ];
 
-var params = {
-  'command' : 'openFile',
-  'data' : 4122629,
-  'list' : [4122629,4122630,4122628,4122632,4122631]
-}
-
 // Private Methods
 var _preciseDecimal = function( number ){
     return Math.floor(number * 100) / 100;
@@ -50,6 +44,10 @@ var _preciseDecimal = function( number ){
 var _startApp = function(){
 
   if( params && params.command === 'openFile' ){
+
+    if( params.list.length == 0 ){
+      params.list = [params.data];
+    }
 
     $( '.weevisor-images img').on( 'load', function(){
 
