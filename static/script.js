@@ -690,6 +690,7 @@ var translate = function (deltaX, deltaY) {
   var newY = restrictRawPos(lastY + deltaY/scale,
                             Math.min(viewportHeight, curHeight), imgHeight);
   y = newY;
+  console.log( Math.ceil(newY*scale) );
   img.css('marginTop', Math.ceil(newY*scale) + 'px');
 };
 var zoomMobile = function (scaleBy) {
@@ -759,6 +760,8 @@ var startMobile = function () {
   /*hammer.get('pinch').set({
     enable: true
   });*/
+  var a = false;
+
   win.on('pan', function (e) {
     translate(e.originalEvent.gesture.deltaX, e.originalEvent.gesture.deltaY);
   })
@@ -791,7 +794,14 @@ var startMobile = function () {
     pinchCenter = null;
   })
   .on('doubletap', function (e) {
-    var c = rawCenter(e.originalEvent);
-    zoomAround(2, c.x, c.y);
+    if(!a){
+      var c = rawCenter(e.originalEvent);
+      zoomAround(2, c.x, c.y);
+      a=true;
+    }else{
+      zoomOut();
+      a=false;
+    }
+
   });
 };
