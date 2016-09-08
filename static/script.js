@@ -646,11 +646,9 @@ if( location.host.indexOf('file') !== -1 ){
   api.app.maximizeView( win );
 }
 
-_startApp();
-
-
 // Traverse the DOM to calculate the absolute position of an element
 var absolutePosition = function (el) {
+
   var x = 0,
     y = 0;
   while (el[0] !== null) {
@@ -659,28 +657,36 @@ var absolutePosition = function (el) {
     el[0] = el[0].offsetParent;
   }
   return { x: x, y: y };
+
 };
 var restrictScale = function (scale) {
+
   if (scale < MIN_SCALE) {
     scale = MIN_SCALE;
   } else if (scale > MAX_SCALE) {
     scale = MAX_SCALE;
   }
   return scale;
+
 };
 var restrictRawPos = function (pos, viewportDim, imgDim) {
+
   if (pos < viewportDim/scale - imgDim) { // too far left/up?
     pos = viewportDim/scale - imgDim;
   } else if (pos > 0) { // too far right/down?
     pos = 0;
   }
   return pos;
+
 };
 var updateLastPos = function (deltaX, deltaY) {
+
   lastX = x;
   lastY = y;
+
 };
 var translate = function (deltaX, deltaY) {
+
   // We restrict to the min of the viewport width/height or current width/height as the
   // current width/height may be smaller than the viewport width/height
   var newX = restrictRawPos(lastX + deltaX/scale,
@@ -690,10 +696,11 @@ var translate = function (deltaX, deltaY) {
   var newY = restrictRawPos(lastY + deltaY/scale,
                             Math.min(viewportHeight, curHeight), imgHeight);
   y = newY;
-  console.log( Math.ceil(newY*scale) );
   img.css('marginTop', Math.ceil(newY*scale) + 'px');
+
 };
 var zoomMobile = function (scaleBy) {
+
   scale = restrictScale(lastScale*scaleBy);
   curWidth = imgWidth*scale;
   curHeight = imgHeight*scale;
@@ -701,8 +708,10 @@ var zoomMobile = function (scaleBy) {
   img.css('height', Math.ceil(curHeight) + 'px');
   // Adjust margins to make sure that we aren't out of bounds
   translate(0, 0);
+
 };
 var rawCenter = function (e) {
+
   var pos = absolutePosition(container);
   // We need to account for the scroll position
   var scrollLeft = win.pageXOffset ? win.pageXOffset : win.scrollLeft();
@@ -710,11 +719,13 @@ var rawCenter = function (e) {
   var zoomX = -x + (e.gesture.center.x - pos.x + scrollLeft)/scale;
   var zoomY = -y + (e.gesture.center.y - pos.y + scrollTop)/scale;
   return { x: zoomX, y: zoomY };
+
 };
 var updateLastScale = function () {
   lastScale = scale;
 };
 var zoomAround = function (scaleBy, rawZoomX, rawZoomY, doNotUpdateLast) {
+
   // Zoom
   zoomMobile(scaleBy);
   // New raw center of viewport
@@ -729,12 +740,15 @@ var zoomAround = function (scaleBy, rawZoomX, rawZoomY, doNotUpdateLast) {
     updateLastScale();
     updateLastPos();
   }
+
 };
 var zoomCenter = function (scaleBy) {
+
   // Center of viewport
   var zoomX = -x + Math.min(viewportWidth, curWidth)/2/scale;
   var zoomY = -y + Math.min(viewportHeight, curHeight)/2/scale;
   zoomAround(scaleBy, zoomX, zoomY);
+
 };
 var zoomIn = function () {
   zoomCenter(2);
@@ -743,6 +757,7 @@ var zoomOut = function () {
   zoomCenter(1/2);
 };
 var startMobile = function () {
+
   img = imgDom;
   container = zone;
   disableImgEventHandlers();
@@ -754,13 +769,7 @@ var startMobile = function () {
   viewportHeight = parseInt( zone.css('height') );
   curWidth = imgWidth*scale;
   curHeight = imgHeight*scale;
-  /*var hammer = new Hammer(container, {
-    domEvents: true
-  });*/
-  /*hammer.get('pinch').set({
-    enable: true
-  });*/
-  var a = false;
+  var isZoomed = false;
 
   win.on('pan', function (e) {
     translate(e.originalEvent.gesture.deltaX, e.originalEvent.gesture.deltaY);
@@ -769,13 +778,16 @@ var startMobile = function () {
     updateLastPos();
   })
   .on('pinch', function (e) {
+
     // We only calculate the pinch center on the first pinch event as we want the center to
     // stay consistent during the entire pinch
     if (pinchCenter === null) {
-      pinchCenter = rawCenter(e);
+
+      pinchCenter = rawCenter(e.originalEvent);
       var offsetX = pinchCenter.x*scale - (-x*scale + Math.min(viewportWidth, curWidth)/2);
       var offsetY = pinchCenter.y*scale - (-y*scale + Math.min(viewportHeight, curHeight)/2);
       pinchCenterOffset = { x: offsetX, y: offsetY };
+
     }
     // When the user pinch zooms, she/he expects the pinch center to remain in the same
     // relative location of the screen. To achieve this, the raw zoom center is calculated by
@@ -787,21 +799,33 @@ var startMobile = function () {
     var zoomY = pinchCenter.y*newScale - pinchCenterOffset.y;
     var zoomCenter = { x: zoomX/newScale, y: zoomY/newScale };
     zoomAround(e.originalEvent.gesture.scale, zoomCenter.x, zoomCenter.y, true);
+
   })
+
   .on('pinchend', function (e) {
+
     updateLastScale();
     updateLastPos();
     pinchCenter = null;
+
   })
+
   .on('doubletap', function (e) {
-    if(!a){
+
+    if( !isZoomed ){
+
       var c = rawCenter(e.originalEvent);
       zoomAround(2, c.x, c.y);
-      a=true;
+      isZoomed=true;
+
     }else{
+
       zoomOut();
       a=false;
+
     }
 
   });
 };
+
+_startApp();
