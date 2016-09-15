@@ -78,6 +78,8 @@ var _preciseDecimal = function( number ){
 
 var _startApp = function(){
 
+  console.log(params);
+
   if( params && params.command === 'openFile' ){
 
     if( params.list.length == 0 ){
@@ -91,7 +93,7 @@ var _startApp = function(){
         imgDom.css('visibility', 'visible');
         loader.hide();
         if( mobile ){
-          startMobile();
+          //startMobile();
         }
 
         if( presentationMode && win.hasClass('fullscreen') ){
@@ -167,7 +169,7 @@ var _loadImage = function( file ){
   _scaleImage( scale );
 
   $( '.weevisor-images img').attr( 'src', file.thumbnails.original );
-  startMobile();
+  //startMobile();
 
 };
 
@@ -829,3 +831,7 @@ var startMobile = function () {
 };
 
 _startApp();
+
+win.on( 'app-param', function( e, paramsA ){
+  console.log('param', paramsA);
+});
