@@ -93,7 +93,7 @@ var _startApp = function(){
         imgDom.css('visibility', 'visible');
         loader.hide();
         if( mobile ){
-          //startMobile();
+          startMobile();
         }
 
         if( presentationMode && win.hasClass('fullscreen') ){
@@ -169,7 +169,7 @@ var _loadImage = function( file ){
   _scaleImage( scale );
 
   $( '.weevisor-images img').attr( 'src', file.thumbnails.original );
-  //startMobile();
+  startMobile();
 
 };
 
@@ -698,7 +698,9 @@ var translate = function (deltaX, deltaY) {
   var newY = restrictRawPos(lastY + deltaY/scale,
                             Math.min(viewportHeight, curHeight), imgHeight);
   y = newY;
-  img.css('marginTop', Math.ceil(newY*scale) + 'px');
+
+  var scale3 = ( viewportHeight - img.height() ) / 2;
+  img.css('marginTop', scale3 > 0 ? scale3 : Math.ceil(newY*scale3) );
 
 };
 var zoomMobile = function (scaleBy) {
@@ -761,14 +763,14 @@ var zoomOut = function () {
 var startMobile = function () {
 
   img = imgDom;
-  container = zone;
+  container = $('.weevisor-images' );
   disableImgEventHandlers();
   imgWidth = parseInt( img.css('width') );
   imgHeight = parseInt( img.css('height') );
-  viewportWidth = parseInt( zone.css('width') );
+  viewportWidth = parseInt( container.css('width') );
   scale = viewportWidth/imgWidth;
   lastScale = scale;
-  viewportHeight = parseInt( zone.css('height') );
+  viewportHeight = parseInt( container.css('height') );
   curWidth = imgWidth*scale;
   curHeight = imgHeight*scale;
   var isZoomed = false;
@@ -818,6 +820,10 @@ var startMobile = function () {
 
       var c = rawCenter(e.originalEvent);
       zoomAround(2, c.x, c.y);
+      console.log(img);
+      var scale3 = ( viewportHeight - img.height() ) / 2;
+      console.log(scale3);
+      img.css( 'margin-top', scale3 > 0 ? scale3 : 0 );
       isZoomed=true;
 
     }else{
