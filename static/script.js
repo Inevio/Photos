@@ -445,7 +445,7 @@ win
   nextBtn.click();
 })
 
-/*.key( 'left, pageup', function(){
+.key( 'left, pageup', function(){
   prevBtn.click();
 })
 
@@ -459,7 +459,7 @@ win
 
 .key( 'numsubtract', function(){
     minus.click();
-})*/
+})
 
 .on( 'ui-view-resize ui-view-maximize ui-view-unmaximize', function(){
 
