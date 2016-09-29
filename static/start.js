@@ -3,19 +3,12 @@
 var view_margin = 50;
 var ui_height = 92;
 
-
 // Local variables
 var win      = $( this );
 var header   = $('.ui-header');
 var uiImages = $('.weevisor-images');
 var picIndex = -1;
 var pictures = [];
-
-var params = {
-  'command' : 'openFile',
-  'data' : 2283920,
-  'list' : [2283920,2283702]
-}
 
 var mobile = win.hasClass('wz-mobile-view');
 
@@ -29,8 +22,8 @@ if( params && params.command === 'openFile' ){
 
     if( mobile ){
 
-      var widthRatio  = width / ( 375 );
-      var heightRatio = height / ( 667 + 41 );
+      var widthRatio  = width / ( wz.tool.desktopWidth() );
+      var heightRatio = height / ( wz.tool.desktopHeight() );
 
     }else{
       var widthRatio  = width / ( wz.tool.desktopWidth() - ( view_margin * 2 ) );
