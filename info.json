@@ -61,7 +61,35 @@
 
             }
 
+        },
+
+        "mobile" : {
+
+            "primary" : "main",
+            "service" : [],
+            "common"  : {
+
+                "css"    : [],
+                "script" : [],
+                "start"  : []
+
+            },
+
+            "view" : {
+
+                "main" : {
+
+                    "template" : "main.html",
+                    "css"    : ["style.css"],
+                    "script" : ["script.js"],
+                    "start"  : []
+
+                }
+
+            }
+
         }
+
 
     },
 
