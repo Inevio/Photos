@@ -93,7 +93,7 @@ var _startApp = function(){
         imgDom.css('visibility', 'visible');
         loader.hide();
         if( mobile ){
-          startMobile();
+          //startMobile();
         }
 
         if( presentationMode && win.hasClass('fullscreen') ){
@@ -169,7 +169,7 @@ var _loadImage = function( file ){
   _scaleImage( scale );
 
   $( '.weevisor-images img').attr( 'src', file.thumbnails.original );
-  startMobile();
+  //startMobile();
 
 };
 
@@ -649,6 +649,7 @@ if( location.host.indexOf('file') !== -1 ){
 }
 
 // Traverse the DOM to calculate the absolute position of an element
+/*
 var absolutePosition = function (el) {
 
   var x = 0,
@@ -835,6 +836,7 @@ var startMobile = function () {
 
   });
 };
+*/
 
 _startApp();
 
