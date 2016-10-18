@@ -25,8 +25,13 @@ if( params && params.command === 'openFile' ){
       var metadata    = structure.formats.original.metadata;
       var width       = parseInt( metadata.exif.imageWidth, 10 );
       var height      = parseInt( metadata.exif.imageHeight, 10 );
-      var widthRatio  = width / ( api.tool.desktopWidth() - ( view_margin * 2 ) );
-      var heightRatio = height / ( api.tool.desktopHeight() - ( view_margin * 2 ) );
+      if( !mobile ){
+        var widthRatio  = width / ( api.tool.desktopWidth() - ( view_margin * 2 ) );
+        var heightRatio = height / ( api.tool.desktopHeight() - ( view_margin * 2 ) );
+      }else{
+        var widthRatio  = width / ( api.tool.desktopWidth() );
+        var heightRatio = height / ( api.tool.desktopHeight() );
+      }
 
       if( widthRatio > 1 || heightRatio > 1 ){
 
@@ -35,7 +40,16 @@ if( params && params.command === 'openFile' ){
           width  = api.tool.desktopWidth() - ( view_margin * 2 );
           height = height / widthRatio;
 
-      if( widthRatio > 1 || heightRatio > 1 ){
+        }else{
+
+          width  = width / heightRatio;
+          height = api.tool.desktopHeight() - ( view_margin * 2 );
+          
+        }
+
+      }
+
+      /*if( widthRatio > 1 || heightRatio > 1 ){
 
           width  = width / heightRatio;
           height = api.tool.desktopHeight() - ( view_margin * 2 );
@@ -43,7 +57,7 @@ if( params && params.command === 'openFile' ){
               width  = wz.tool.desktopWidth() - ( view_margin * 2 );
               height = height / widthRatio;
 
-      }
+      }*/
 
       win.css({
         'width'   : width + 'px',
