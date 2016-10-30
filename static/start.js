@@ -19,7 +19,6 @@ if( params && params.command === 'openFile' ){
 
     structure.getFormats( function( error, formats ){
 
-
       structure.formats = formats;
 
       var metadata    = structure.formats.original.metadata;
@@ -44,7 +43,7 @@ if( params && params.command === 'openFile' ){
 
           width  = width / heightRatio;
           height = api.tool.desktopHeight() - ( view_margin * 2 );
-          
+
         }
 
       }

@@ -76,14 +76,16 @@ var _preciseDecimal = function( number ){
     return Math.floor(number * 100) / 100;
 };
 
-var _startApp = function(){
+var _startApp = function( paramsArg ){
 
-  console.log(params);
+  if( typeof paramsArg === 'undefined' ){
+    paramsArg = params
+  }
 
-  if( params && params.command === 'openFile' ){
+  if( paramsArg && paramsArg.command === 'openFile' ){
 
-    if( params.list.length == 0 ){
-      params.list = [params.data];
+    if( paramsArg.list.length == 0 ){
+      paramsArg.list = [paramsArg.data];
     }
 
     $( '.weevisor-images img').on( 'load', function(){
@@ -111,10 +113,10 @@ var _startApp = function(){
     });
 
     // To Do -> Error
-    var initialIndex = params.list.indexOf( params.data );
+    var initialIndex = paramsArg.list.indexOf( paramsArg.data );
     var newIndex = 0;
 
-    params.list.forEach( function(item, index){
+    paramsArg.list.forEach( function(item, index){
 
       api.fs( item, function( error, structure ){
 
@@ -848,6 +850,6 @@ var startMobile = function () {
 
 _startApp();
 
-win.on( 'app-param', function( e, paramsA ){
-  console.log('param', paramsA);
+win.on( 'app-param', function( e, paramsArg ){
+  _startApp( paramsArg )
 });
