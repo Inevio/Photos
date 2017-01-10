@@ -7,7 +7,7 @@ var original          = $( '.ui-footer .zoom-original', win );
 var zone              = $( '.weevisor-images', win );
 var zoomUi            = $( '.weevisor-zoom', win );
 var imgDom            = $( '.weevisor-images img', win);
-var uiBarTop          = $('.ui-header');
+var uiBarTop          = $('.ui-header-desktop');
 var loader            = $('.weevisor-images .loader');
 var prevBtn           = $('.ui-footer .prev-btn');
 var nextBtn           = $('.ui-footer .next-btn');
@@ -31,6 +31,10 @@ var zoom;
 var imageLoaded;
 var scale;
 var mobile = win.hasClass('wz-mobile-view');
+
+if( mobile ){
+  uiBarTop = $('.ui-header-mobile');
+}
 
 var MIN_SCALE = 1; // 1=scaling when first loaded
 var MAX_SCALE = 64;
