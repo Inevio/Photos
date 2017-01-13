@@ -406,3 +406,20 @@
   }
 
 }
+
+.wz-view.link-mode{
+
+  .presentation-buttons{
+    display: none;
+  }
+
+  .zoom-buttons{
+    float: right;
+    left: -20px;
+  }
+
+  .ui-fullscreen{
+    display: none;
+  }
+
+}

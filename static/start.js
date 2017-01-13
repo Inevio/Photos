@@ -58,6 +58,8 @@ if( params && params.command === 'openFile' ){
 
       }*/
 
+      console.log(metadata,width,height);
+
       win.css({
         'width'   : width + 'px',
         'height'  : height + ui_height/2 + 'px'
@@ -66,6 +68,12 @@ if( params && params.command === 'openFile' ){
       win.addClass('dark');
       win.css({'background':'#2c3238'});
       $('.weevisor-content').css({'background':'#3f4750'});
+
+      if( location.hostname.indexOf('file') === 0 ){
+        win.addClass('link-mode');
+        win.parent().removeClass('wz-draggable');
+      }
+
       start();
 
     });
