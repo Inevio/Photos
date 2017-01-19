@@ -76,6 +76,41 @@ var menuHeight = $( '.wz-view-menu', win ).outerHeight();
 var validZoom = [ 0.01, 0.02, 0.03, 0.04, 0.06, 0.08, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.75, 1, 1.5, 2, 3, 4, 5 ];
 
 // Private Methods
+var asyncEach = function( list, step, callback ){
+
+  var position = 0;
+  var closed   = false;
+  var checkEnd = function( error ){
+
+    if( closed ){
+      return;
+    }
+
+    position++;
+
+    if( position === list.length || error ){
+
+      closed = true;
+
+      callback( error );
+
+      // Nullify
+      list = step = callback = position = checkEnd = closed = null;
+
+    }
+
+  };
+
+  if( !list.length ){
+    return callback();
+  }
+
+  list.forEach( function( item ){
+    step( item, checkEnd );
+  });
+
+};
+
 var _preciseDecimal = function( number ){
     return Math.floor(number * 100) / 100;
 };
@@ -117,15 +152,17 @@ var _startApp = function( paramsArg ){
     });
 
     // To Do -> Error
-    var initialIndex = paramsArg.list.indexOf( paramsArg.data );
     var newIndex = 0;
+    pictures = [];
 
-    paramsArg.list.forEach( function(item, index){
+    asyncEach( paramsArg.list , function( item, callback ){
+
+      var index = newIndex++
 
       api.fs( item, function( error, structure ){
 
         if( error ){
-          return;
+          return callback();
         }
 
         if( [ 'image/gif', 'image/jpeg', 'image/png', 'image/tiff' ].indexOf( structure.mime ) !== -1 ){
@@ -133,25 +170,32 @@ var _startApp = function( paramsArg ){
           structure.getFormats( function( error, formats ){
 
             structure.formats = formats;
+            pictures[ index ] = structure;
 
-            pictures[ newIndex ] = structure;
-
-            if( index === initialIndex ){
-
-              picIndex = newIndex;
-              _loadImage( pictures[picIndex] );
-
+            if( structure.id === paramsArg.data ){
+              picIndex = index;
             }
 
-            newIndex++;
+            return callback();
+
 
           });
 
+        }else{
+          return callback();
         }
 
       });
 
+    }, function(){
+
+      var startPhoto = pictures[picIndex];
+      pictures = pictures.filter( function(item){ return item } );
+      picIndex = pictures.indexOf( startPhoto );
+      _loadImage( pictures[picIndex] );
+
     });
+
 
   }
 
@@ -159,6 +203,7 @@ var _startApp = function( paramsArg ){
 
 var _loadImage = function( file ){
 
+  //console.log(pictures);
   $( '.ui-header-brand span', win ).text( file.name );
   imageLoaded = file;
 
@@ -851,8 +896,6 @@ var startMobile = function () {
   });
 };
 */
-
-_startApp();
 
 win.on( 'app-param', function( e, paramsArg ){
   _startApp( paramsArg )
