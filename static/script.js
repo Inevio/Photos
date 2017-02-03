@@ -172,7 +172,7 @@ var _startApp = function( paramsArg ){
             structure.formats = formats;
             pictures[ index ] = structure;
 
-            if( structure.id === paramsArg.data ){
+            if( structure.id === paramsArg.data || paramsArg.data === 'provided' ){
               picIndex = index;
             }
 
