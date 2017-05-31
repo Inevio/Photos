@@ -228,7 +228,12 @@ var _loadImage = function( file ){
   normalScale = scale;
   _scaleImage( scale );
 
-  $( '.weevisor-images img').attr( 'src', file.formats.original.url );
+  if( mobile ){
+    //Si es mobile cargamos la preview
+    $( '.weevisor-images img').attr( 'src', file.icons[512] );
+  }else{
+    $( '.weevisor-images img').attr( 'src', file.formats.original.url );
+  }
 
 };
 
