@@ -369,6 +369,11 @@
    height: ~'calc(100% - 50px)';
   }
 
+  .weevisor-content,.weevisor-images, .weevisor-images img{
+    cursor: pointer;
+    touch-action: none;
+  }
+
   .ui-header-desktop{
     display: none;
   }

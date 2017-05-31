@@ -509,6 +509,17 @@ win
   nextBtn.click();
 })
 
+.on( 'pinch' , function(e){
+  console.log('pinch');
+  e.preventDefault();
+  e.stopPropagation();
+})
+
+.on( 'pinchend' , function(e){
+  e.preventDefault();
+  e.stopPropagation();
+})
+
 .key( 'left, pageup', function(){
   prevBtn.click();
 })
