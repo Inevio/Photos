@@ -30,7 +30,7 @@ var lastFile          = false;
 var zoom;
 var imageLoaded;
 var scale;
-var mobile = win.hasClass('wz-mobile-view');
+var mobile = typeof cordova !== 'undefined'
 
 if( mobile ){
   uiBarTop = $('.ui-header-mobile');
@@ -659,6 +659,10 @@ zoomUi
 
 zone
 .on( 'mousewheel', function( e, d, x, y ){
+
+  if( mobile ){
+    return
+  }
 
   var zoom2    = zoom;
   var scrollX = 0;
