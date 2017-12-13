@@ -155,6 +155,14 @@ var _startApp = function( paramsArg ){
     var newIndex = 0;
     pictures = [];
 
+
+    if ( paramsArg.dropbox ) {
+
+      _loadImage( paramsArg );
+      return;
+
+    }
+
     asyncEach( paramsArg.list , function( item, callback ){
 
       var index = newIndex++
@@ -207,8 +215,17 @@ var _loadImage = function( file ){
   $( '.ui-header-brand span', win ).text( file.name );
   imageLoaded = file;
 
-  var width  = parseInt( file.formats.original.metadata.exif.imageWidth, 10 );
-  var height = parseInt( file.formats.original.metadata.exif.imageHeight, 10 );
+  if ( file.dropbox ) {
+
+    var width  = parseInt( file.metadata['media_info'].metadata.dimensions.width, 10 );
+    var height = parseInt( file.metadata['media_info'].metadata.dimensions.height, 10 );
+
+  }else{
+
+    var width  = parseInt( file.formats.original.metadata.exif.imageWidth, 10 );
+    var height = parseInt( file.formats.original.metadata.exif.imageHeight, 10 );
+
+  }
 
   var scale1 = zone.width() / width ;
   var scale2 = zone.height() / height ;
@@ -232,8 +249,13 @@ var _loadImage = function( file ){
     //Si es mobile cargamos la preview
     $( '.weevisor-images img').attr( 'src', file.icons[512] );
   }else{
-    $( '.weevisor-images img').attr( 'src', file.formats.original.url );
+    if( file.dropbox ){
+      $( '.weevisor-images img').attr( 'src', 'http://download.horbito.com/dropbox/' + file.dropbox + '/' + encodeURIComponent( file.id ) );
+    }else{
+      $( '.weevisor-images img').attr( 'src', file.formats.original.url );
+    }
   }
+
 
 };
 
@@ -246,9 +268,20 @@ var _scaleImage = function( scaleArg ){
       return false;
   }
 
-  $( 'img', zone )
-      .width( parseInt( scale * imageLoaded.formats.original.metadata.exif.imageWidth, 10 ) )
-      .height( parseInt( scale * imageLoaded.formats.original.metadata.exif.imageHeight, 10 ) );
+
+  if ( imageLoaded.dropbox ) {
+
+    $( 'img', zone )
+      .width( parseInt( scale * imageLoaded.metadata['media_info'].metadata.dimensions.width, 10 ) )
+      .height( parseInt( scale * imageLoaded.metadata['media_info'].metadata.dimensions.height, 10 ) );
+
+  }else{
+
+    $( 'img', zone )
+        .width( parseInt( scale * imageLoaded.formats.original.metadata.exif.imageWidth, 10 ) )
+        .height( parseInt( scale * imageLoaded.formats.original.metadata.exif.imageHeight, 10 ) );
+
+  }
 
   zoomUi.val( _preciseDecimal( scale * 100 ) );
 
