@@ -250,7 +250,7 @@ var _loadImage = function( file ){
     $( '.weevisor-images img').attr( 'src', file.icons[512] );
   }else{
     if( file.dropbox ){
-      $( '.weevisor-images img').attr( 'src', 'http://download.horbito.com/dropbox/' + file.dropbox + '/' + encodeURIComponent( file.id ) );
+      $( '.weevisor-images img').attr( 'src', 'https://download.horbito.com/dropbox/' + file.dropbox + '/' + encodeURIComponent( file.id ) );
     }else{
       $( '.weevisor-images img').attr( 'src', file.formats.original.url );
     }
