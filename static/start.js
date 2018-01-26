@@ -21,11 +21,79 @@ if( params && params.command === 'openFile' ){
 
       account.getMetadata( params.id, function( err, metadata ){
 
-        params.metadata = metadata;
+        console.log( metadata )
+
+        params.metadata = metadata.media_info.metadata;
+
+        var width       = parseInt( params.metadata.dimensions.width, 10 );
+        var height      = parseInt( params.metadata.dimensions.height, 10 );
+        if( !mobile ){
+          var widthRatio  = width / ( api.tool.desktopWidth() - ( view_margin * 2 ) );
+          var heightRatio = height / ( api.tool.desktopHeight() - ( view_margin * 2 ) );
+        }else{
+          var widthRatio  = width / ( api.tool.desktopWidth() );
+          var heightRatio = height / ( api.tool.desktopHeight() );
+        }
+
+        if( widthRatio > 1 || heightRatio > 1 ){
+
+          if( widthRatio >= heightRatio ){
+
+            width  = api.tool.desktopWidth() - ( view_margin * 2 );
+            height = height / widthRatio;
+
+          }else{
+
+            width  = width / heightRatio;
+            height = api.tool.desktopHeight() - ( view_margin * 2 );
+
+          }
+
+        }
+
+        /*if( widthRatio > 1 || heightRatio > 1 ){
+
+            width  = width / heightRatio;
+            height = api.tool.desktopHeight() - ( view_margin * 2 );
+
+                width  = wz.tool.desktopWidth() - ( view_margin * 2 );
+                height = height / widthRatio;
+
+        }*/
+
+        console.log(params.metadata,width,height);
+
+        win.css({
+          'width'   : width + 'px',
+          'height'  : height + ui_height/2 + 'px'
+        });
+
+        win.addClass('dark');
+        win.css({'background':'#2c3238'});
+        $('.weevisor-content').css({'background':'#3f4750'});
+
+        if( location.hostname.indexOf('file') === 0 ){
+          win.addClass('link-mode');
+          win.parent().removeClass('wz-draggable');
+        }
+
+        start();
+
+      });
+
+    });
+
+  }else if( params.gdrive ){
+
+    api.integration.gdrive( params.gdrive, function( err, account ){
+
+      account.get( params.id, function( err, data ){
+
+        params.metadata = data.imageMediaMetadata;
 
         var metadata    = metadata;
-        var width       = parseInt( metadata['media_info'].metadata.dimensions.width, 10 );
-        var height      = parseInt( metadata['media_info'].metadata.dimensions.height, 10 );
+        var width       = parseInt( params.metadata.width, 10 );
+        var height      = parseInt( params.metadata.height, 10 );
         if( !mobile ){
           var widthRatio  = width / ( api.tool.desktopWidth() - ( view_margin * 2 ) );
           var heightRatio = height / ( api.tool.desktopHeight() - ( view_margin * 2 ) );
@@ -78,9 +146,9 @@ if( params && params.command === 'openFile' ){
 
         start();
 
-      });
+      })
 
-    });
+    })
 
   }else{
 
@@ -127,7 +195,7 @@ if( params && params.command === 'openFile' ){
 
       }*/
 
-      console.log(metadata,width,height);
+      console.log(params.metadata,width,height);
 
       win.css({
         'width'   : width + 'px',

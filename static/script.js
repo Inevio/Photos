@@ -155,12 +155,8 @@ var _startApp = function( paramsArg ){
     var newIndex = 0;
     pictures = [];
 
-
-    if ( paramsArg.dropbox ) {
-
-      _loadImage( paramsArg );
-      return;
-
+    if ( paramsArg.dropbox || paramsArg.gdrive ) {
+      return _loadImage( paramsArg );
     }
 
     asyncEach( paramsArg.list , function( item, callback ){
@@ -217,8 +213,13 @@ var _loadImage = function( file ){
 
   if ( file.dropbox ) {
 
-    var width  = parseInt( file.metadata['media_info'].metadata.dimensions.width, 10 );
-    var height = parseInt( file.metadata['media_info'].metadata.dimensions.height, 10 );
+    var width  = parseInt( file.metadata.dimensions.width, 10 );
+    var height = parseInt( file.metadata.dimensions.height, 10 );
+
+  }else if ( file.gdrive ) {
+
+    var width  = parseInt( file.metadata.width, 10 );
+    var height = parseInt( file.metadata.height, 10 );
 
   }else{
 
@@ -251,6 +252,8 @@ var _loadImage = function( file ){
   }else{
     if( file.dropbox ){
       $( '.weevisor-images img').attr( 'src', 'https://download.horbito.com/dropbox/' + file.dropbox + '/' + encodeURIComponent( file.id ) );
+    }else if( file.gdrive ){
+      $( '.weevisor-images img').attr( 'src', 'https://download.horbito.com/gdrive/' + file.gdrive + '/' + encodeURIComponent( file.id ) );
     }else{
       $( '.weevisor-images img').attr( 'src', file.formats.original.url );
     }
@@ -272,8 +275,14 @@ var _scaleImage = function( scaleArg ){
   if ( imageLoaded.dropbox ) {
 
     $( 'img', zone )
-      .width( parseInt( scale * imageLoaded.metadata['media_info'].metadata.dimensions.width, 10 ) )
-      .height( parseInt( scale * imageLoaded.metadata['media_info'].metadata.dimensions.height, 10 ) );
+      .width( parseInt( scale * imageLoaded.metadata.dimensions.width, 10 ) )
+      .height( parseInt( scale * imageLoaded.metadata.dimensions.height, 10 ) );
+
+  }else if ( imageLoaded.gdrive ) {
+
+    $( 'img', zone )
+      .width( parseInt( scale * imageLoaded.metadata.width, 10 ) )
+      .height( parseInt( scale * imageLoaded.metadata.height, 10 ) );
 
   }else{
 
