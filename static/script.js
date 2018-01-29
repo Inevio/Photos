@@ -152,60 +152,143 @@ var _startApp = function( paramsArg ){
     });
 
     // To Do -> Error
-    var newIndex = 0;
-    pictures = [];
+    console.log( paramsArg.list )
 
-    if ( paramsArg.dropbox || paramsArg.gdrive ) {
-      return _loadImage( paramsArg );
+    if ( paramsArg.dropbox || paramsArg.gdrive || paramsArg.onedrive ) {
+      _preloadCloud( paramsArg );
+    }else{
+      _preloadFS( paramsArg )
     }
-
-    asyncEach( paramsArg.list , function( item, callback ){
-
-      var index = newIndex++
-
-      api.fs( item, function( error, structure ){
-
-        if( error ){
-          return callback();
-        }
-
-        if( [ 'image/gif', 'image/jpeg', 'image/png', 'image/tiff' ].indexOf( structure.mime ) !== -1 ){
-
-          structure.getFormats( function( error, formats ){
-
-            structure.formats = formats;
-            pictures[ index ] = structure;
-
-            if( structure.id === paramsArg.data || paramsArg.data === 'provided' ){
-              picIndex = index;
-            }
-
-            return callback();
-
-
-          });
-
-        }else{
-          return callback();
-        }
-
-      });
-
-    }, function(){
-
-      var startPhoto = pictures[picIndex];
-      pictures = pictures.filter( function(item){ return item } );
-      picIndex = pictures.indexOf( startPhoto );
-      _loadImage( pictures[picIndex] );
-
-    });
-
 
   }
 
 }
 
+var _preloadCloud = function( paramsArg ){
+
+  var cloud = paramsArg.dropbox ? 'dropbox' : ( paramsArg.gdrive ? 'gdrive' : 'onedrive' )
+  var account = paramsArg.dropbox ? paramsArg.dropbox : ( paramsArg.gdrive ? paramsArg.gdrive : paramsArg.onedrive )
+  pictures = [];
+
+  api.integration[ cloud ]( account, function( err, account ){
+
+    asyncEach( paramsArg.list, function( item, callback ){
+
+      account.get( item, function( error, structure ){
+
+        if( !error ){
+          pictures.push( structure )
+        }
+
+        callback()
+
+      });
+
+    }, function(){
+
+      console.log( paramsArg.list.length, pictures.length, pictures )
+
+      for( var i = 0; i < pictures.length; i++ ){
+
+        if( pictures[ i ].id === paramsArg.data || paramsArg.data === 'provided' ){
+          picIndex = i
+          break
+        }
+
+      }
+
+      _loadImage( pictures[picIndex] );
+
+    })
+
+  })
+
+  pictures = [];
+
+  asyncEach( paramsArg.list, function( item, callback ){
+
+    api.fs( item, function( error, structure ){
+
+      if( error ){
+        return callback();
+      }
+
+      if( [ 'image/gif', 'image/jpeg', 'image/png', 'image/tiff' ].indexOf( structure.mime ) !== -1 ){
+
+        structure.getFormats( function( error, formats ){
+
+          structure.formats = formats;
+          pictures.push( structure )
+
+          return callback();
+
+        });
+
+      }else{
+        return callback();
+      }
+
+    });
+
+  }, function(){
+
+
+
+  })
+
+}
+
+var _preloadFS = function( paramsArg ){
+
+  pictures = [];
+
+  asyncEach( paramsArg.list, function( item, callback ){
+
+    api.fs( item, function( error, structure ){
+
+      if( error ){
+        return callback();
+      }
+
+      if( [ 'image/gif', 'image/jpeg', 'image/png', 'image/tiff' ].indexOf( structure.mime ) !== -1 ){
+
+        structure.getFormats( function( error, formats ){
+
+          structure.formats = formats;
+          pictures.push( structure )
+
+          return callback();
+
+        });
+
+      }else{
+        return callback();
+      }
+
+    });
+
+  }, function(){
+
+    console.log( paramsArg.list.length, pictures.length, pictures )
+
+    for( var i = 0; i < pictures.length; i++ ){
+
+      if( pictures[ i ].id === paramsArg.data || paramsArg.data === 'provided' ){
+        picIndex = i
+        break
+      }
+
+    }
+
+    _loadImage( pictures[picIndex] );
+
+  })
+
+}
+
 var _loadImage = function( file ){
+
+  console.log( file )
 
   //console.log(pictures);
   $( '.ui-header-brand span', win ).text( file.name );
@@ -216,10 +299,15 @@ var _loadImage = function( file ){
     var width  = parseInt( file.metadata.dimensions.width, 10 );
     var height = parseInt( file.metadata.dimensions.height, 10 );
 
-  }else if ( file.gdrive ) {
+  }else if ( file.gdrive ){
 
     var width  = parseInt( file.metadata.width, 10 );
     var height = parseInt( file.metadata.height, 10 );
+
+  }else if( file.onedrive ){
+
+    var width  = parseInt( file.image.width, 10 );
+    var height = parseInt( file.image.height, 10 );
 
   }else{
 
@@ -254,6 +342,8 @@ var _loadImage = function( file ){
       $( '.weevisor-images img').attr( 'src', 'https://download.horbito.com/dropbox/' + file.dropbox + '/' + encodeURIComponent( file.id ) );
     }else if( file.gdrive ){
       $( '.weevisor-images img').attr( 'src', 'https://download.horbito.com/gdrive/' + file.gdrive + '/' + encodeURIComponent( file.id ) );
+    }else if( file.onedrive ){
+      $( '.weevisor-images img').attr( 'src', 'https://download.horbito.com/onedrive/' + file.onedrive + '/' + encodeURIComponent( file.id ) );
     }else{
       $( '.weevisor-images img').attr( 'src', file.formats.original.url );
     }
@@ -268,9 +358,8 @@ var _scaleImage = function( scaleArg ){
   scale = scaleArg;
 
   if( isNaN( scale ) || scale <= 0 || scale > 5 ){
-      return false;
+    return false;
   }
-
 
   if ( imageLoaded.dropbox ) {
 
@@ -278,11 +367,17 @@ var _scaleImage = function( scaleArg ){
       .width( parseInt( scale * imageLoaded.metadata.dimensions.width, 10 ) )
       .height( parseInt( scale * imageLoaded.metadata.dimensions.height, 10 ) );
 
-  }else if ( imageLoaded.gdrive ) {
+  }else if ( imageLoaded.gdrive ){
 
     $( 'img', zone )
       .width( parseInt( scale * imageLoaded.metadata.width, 10 ) )
       .height( parseInt( scale * imageLoaded.metadata.height, 10 ) );
+
+  }else if( imageLoaded.onedrive ) {
+
+    $( 'img', zone )
+      .width( parseInt( scale * imageLoaded.image.width, 10 ) )
+      .height( parseInt( scale * imageLoaded.image.height, 10 ) );
 
   }else{
 
