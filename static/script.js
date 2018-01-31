@@ -176,7 +176,7 @@ var _preloadCloud = function( paramsArg ){
 
       account.get( item, function( error, structure ){
 
-        if( !error ){
+        if( !error && [ 'image/gif', 'image/jpeg', 'image/png', 'image/tiff' ].indexOf( structure.mime ) !== -1 ){
           pictures.push( structure )
         }
 
@@ -200,39 +200,6 @@ var _preloadCloud = function( paramsArg ){
       _loadImage( pictures[picIndex] );
 
     })
-
-  })
-
-  pictures = [];
-
-  asyncEach( paramsArg.list, function( item, callback ){
-
-    api.fs( item, function( error, structure ){
-
-      if( error ){
-        return callback();
-      }
-
-      if( [ 'image/gif', 'image/jpeg', 'image/png', 'image/tiff' ].indexOf( structure.mime ) !== -1 ){
-
-        structure.getFormats( function( error, formats ){
-
-          structure.formats = formats;
-          pictures.push( structure )
-
-          return callback();
-
-        });
-
-      }else{
-        return callback();
-      }
-
-    });
-
-  }, function(){
-
-
 
   })
 
@@ -288,21 +255,18 @@ var _preloadFS = function( paramsArg ){
 
 var _loadImage = function( file ){
 
-  console.log( file )
-
-  //console.log(pictures);
   $( '.ui-header-brand span', win ).text( file.name );
   imageLoaded = file;
 
   if ( file.dropbox ) {
 
-    var width  = parseInt( file.metadata.dimensions.width, 10 );
-    var height = parseInt( file.metadata.dimensions.height, 10 );
+    var width  = parseInt( file.media_info.metadata.dimensions.width, 10 );
+    var height = parseInt( file.media_info.metadata.dimensions.height, 10 );
 
   }else if ( file.gdrive ){
 
-    var width  = parseInt( file.metadata.width, 10 );
-    var height = parseInt( file.metadata.height, 10 );
+    var width  = parseInt( file.imageMediaMetadata.width, 10 );
+    var height = parseInt( file.imageMediaMetadata.height, 10 );
 
   }else if( file.onedrive ){
 
@@ -336,14 +300,14 @@ var _loadImage = function( file ){
 
   if( mobile ){
     //Si es mobile cargamos la preview
-    $( '.weevisor-images img').attr( 'src', file.icons[512] );
+    $( '.weevisor-images img').attr( 'src', file.icons[ 512 ] );
   }else{
     if( file.dropbox ){
-      $( '.weevisor-images img').attr( 'src', 'https://download.horbito.com/dropbox/' + file.dropbox + '/' + encodeURIComponent( file.id ) );
+      $( '.weevisor-images img').attr( 'src', 'https://download.horbito.com/dropbox/' + file.account + '/' + encodeURIComponent( file.id ) );
     }else if( file.gdrive ){
-      $( '.weevisor-images img').attr( 'src', 'https://download.horbito.com/gdrive/' + file.gdrive + '/' + encodeURIComponent( file.id ) );
+      $( '.weevisor-images img').attr( 'src', 'https://download.horbito.com/gdrive/' + file.account + '/' + encodeURIComponent( file.id ) );
     }else if( file.onedrive ){
-      $( '.weevisor-images img').attr( 'src', 'https://download.horbito.com/onedrive/' + file.onedrive + '/' + encodeURIComponent( file.id ) );
+      $( '.weevisor-images img').attr( 'src', 'https://download.horbito.com/onedrive/' + file.account + '/' + encodeURIComponent( file.id ) );
     }else{
       $( '.weevisor-images img').attr( 'src', file.formats.original.url );
     }
@@ -364,14 +328,14 @@ var _scaleImage = function( scaleArg ){
   if ( imageLoaded.dropbox ) {
 
     $( 'img', zone )
-      .width( parseInt( scale * imageLoaded.metadata.dimensions.width, 10 ) )
-      .height( parseInt( scale * imageLoaded.metadata.dimensions.height, 10 ) );
+      .width( parseInt( scale * imageLoaded.media_info.metadata.dimensions.width, 10 ) )
+      .height( parseInt( scale * imageLoaded.media_info.metadata.dimensions.height, 10 ) );
 
   }else if ( imageLoaded.gdrive ){
 
     $( 'img', zone )
-      .width( parseInt( scale * imageLoaded.metadata.width, 10 ) )
-      .height( parseInt( scale * imageLoaded.metadata.height, 10 ) );
+      .width( parseInt( scale * imageLoaded.imageMediaMetadata.width, 10 ) )
+      .height( parseInt( scale * imageLoaded.imageMediaMetadata.height, 10 ) );
 
   }else if( imageLoaded.onedrive ) {
 

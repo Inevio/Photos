@@ -70,7 +70,7 @@ if( params && params.command === 'openFile' ){
 
     api.integration.dropbox( params.dropbox, function( err, account ){
 
-      account.getMetadata( params.id, function( err, metadata ){
+      account.get( params.id, function( err, metadata ){
 
         params.metadata = metadata.media_info.metadata;
 
