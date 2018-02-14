@@ -72,7 +72,7 @@ if( params && params.command === 'openFile' ){
 
       account.get( params.id, function( err, metadata ){
 
-        params.metadata = metadata.media_info ? metadata.media_info.metadata : { dimensions : { width : 700 , height : 450 } }
+        params.metadata = metadata.media_info && metadata.media_info.metadata && metadata.media_info.metadata.dimensions ? metadata.media_info.metadata : { dimensions : { width : 700 , height : 450 } }
 
         var width  = parseInt( params.metadata.dimensions.width, 10 );
         var height = parseInt( params.metadata.dimensions.height, 10 );
