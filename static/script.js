@@ -177,7 +177,13 @@ var _preloadCloud = function( paramsArg ){
       account.get( item, function( error, structure ){
 
         if( !error && [ 'image/gif', 'image/jpeg', 'image/png', 'image/tiff' ].indexOf( structure.mime ) !== -1 ){
+
+          if( structure.dropbox && !structure.media_info ){
+            structure.media_info = { metadata : { dimensions : { width : 700 , height : 450 } } }
+          }
+
           pictures.push( structure )
+
         }
 
         callback()
