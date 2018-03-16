@@ -169,10 +169,13 @@ var _preloadCloud = function( paramsArg ){
   var cloud = paramsArg.dropbox ? 'dropbox' : ( paramsArg.gdrive ? 'gdrive' : 'onedrive' )
   var account = paramsArg.dropbox ? paramsArg.dropbox : ( paramsArg.gdrive ? paramsArg.gdrive : paramsArg.onedrive )
   pictures = [];
+  var newIndex = 0
 
   api.integration[ cloud ]( account, function( err, account ){
 
     asyncEach( paramsArg.list, function( item, callback ){
+
+      var index = newIndex++
 
       account.get( item, function( error, structure ){
 
@@ -182,7 +185,7 @@ var _preloadCloud = function( paramsArg ){
             structure.media_info = { metadata : { dimensions : { width : 700 , height : 450 } } }
           }
 
-          pictures.push( structure )
+          pictures[ index ] = structure
 
         }
 
@@ -193,6 +196,7 @@ var _preloadCloud = function( paramsArg ){
     }, function(){
 
       console.log( paramsArg.list.length, pictures.length, pictures )
+      pictures = pictures.filter( function(item){ return item } )
 
       for( var i = 0; i < pictures.length; i++ ){
 
@@ -213,9 +217,12 @@ var _preloadCloud = function( paramsArg ){
 
 var _preloadFS = function( paramsArg ){
 
-  pictures = [];
+  pictures = []
+  var newIndex = 0
 
   asyncEach( paramsArg.list, function( item, callback ){
+
+    var index = newIndex++
 
     api.fs( item, function( error, structure ){
 
@@ -227,15 +234,15 @@ var _preloadFS = function( paramsArg ){
 
         structure.getFormats( function( error, formats ){
 
-          structure.formats = formats;
-          pictures.push( structure )
+          structure.formats = formats
+          pictures[ index ] = structure
 
-          return callback();
+          return callback()
 
         });
 
       }else{
-        return callback();
+        return callback()
       }
 
     });
@@ -243,6 +250,8 @@ var _preloadFS = function( paramsArg ){
   }, function(){
 
     console.log( paramsArg.list.length, pictures.length, pictures )
+
+    pictures = pictures.filter( function(item){ return item } )
 
     for( var i = 0; i < pictures.length; i++ ){
 
@@ -253,7 +262,7 @@ var _preloadFS = function( paramsArg ){
 
     }
 
-    _loadImage( pictures[picIndex] );
+    _loadImage( pictures[picIndex] )
 
   })
 
