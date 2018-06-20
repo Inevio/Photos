@@ -31,6 +31,15 @@ var zoom;
 var imageLoaded;
 var scale;
 var mobile = $('body').hasClass('wz-mobile-view')
+var adjustScale = 1;
+var adjustDeltaX = 0;
+var adjustDeltaY = 0;
+
+var currentScale = null;
+var currentDeltaX = null;
+var currentDeltaY = null;
+
+var disabledHammerEvents = false
 
 if( mobile ){
   uiBarTop = $('.ui-header-mobile');
@@ -284,8 +293,18 @@ var _loadImage = function( file ){
   _scaleImage( scale );
 
   if( mobile ){
+
+    adjustScale = 1;
+    adjustDeltaX = 0;
+    adjustDeltaY = 0;
+    disabledHammerEvents = true;
     //Si es mobile cargamos la preview
     $( '.weevisor-images img').attr( 'src', file.icons[1024] );
+    $('img', zone).css('transform', 'scale(' + adjustScale + ') translate(' + adjustDeltaX + ',' + adjustDeltaY + ')')
+    setTimeout(function(){
+      disabledHammerEvents = false;
+    },1)
+
   }else{
     if( file.dropbox ){
       $( '.weevisor-images img').attr( 'src', 'https://download.horbito.com/dropbox/' + file.account + '/' + encodeURIComponent( file.id ) );
@@ -571,25 +590,49 @@ win
 
 })*/
 
-.on( 'swiperight', function(){
+.on( 'swiperight', function(ev){
   console.log('swiperight',prevBtn)
   prevBtn.click();
+  /*ev.preventDefault();
+  ev.stopPropagation();*/
 })
 
-.on( 'swipeleft', function(){
+.on( 'swipeleft', function(ev){
   console.log('swipeleft',nextBtn)
   nextBtn.click();
+  /*ev.preventDefault();
+  ev.stopPropagation();*/
 })
 
-.on( 'pinch' , function(e){
-  console.log('pinch');
-  e.preventDefault();
-  e.stopPropagation();
+.on( 'pinch pan' , function(ev){
+
+  if(!disabledHammerEvents){
+
+    console.log(ev)
+    currentScale = adjustScale * ev.originalEvent.gesture.scale;
+    currentDeltaX = adjustDeltaX + (ev.originalEvent.gesture.deltaX / currentScale);
+    currentDeltaY = adjustDeltaY + (ev.originalEvent.gesture.deltaY / currentScale);
+    console.log('pinch pan',currentScale);
+    $('img', zone).css('transform', 'scale(' + currentScale + ') translate(' + currentDeltaX + ',' + currentDeltaY + ')')
+    /*ev.preventDefault();
+    ev.stopPropagation();*/
+
+  }
+
 })
 
-.on( 'pinchend' , function(e){
-  e.preventDefault();
-  e.stopPropagation();
+.on( 'pinchend panend' , function(e){
+
+  if(!disabledHammerEvents){
+
+    adjustScale = currentScale;
+    adjustDeltaX = currentDeltaX;
+    adjustDeltaY = currentDeltaY;
+    /*e.preventDefault();
+    e.stopPropagation();*/
+
+  }
+
 })
 
 /*.on( 'ui-view-resize ui-view-maximize ui-view-unmaximize', function(){
