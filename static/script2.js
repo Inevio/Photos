@@ -1,6 +1,6 @@
 
 // Variables
-var win               = $( 'body' );
+var win               = $( document.body );
 var minus             = $( '.ui-footer .zoom-minus', win );
 var plus              = $( '.ui-footer .zoom-plus', win );
 var original          = $( '.ui-footer .zoom-original', win );
@@ -36,44 +36,10 @@ if( mobile ){
   uiBarTop = $('.ui-header-mobile');
 }
 
-var MIN_SCALE = 1; // 1=scaling when first loaded
-var MAX_SCALE = 64;
-// HammerJS fires "pinch" and "pan" events that are cumulative in nature and not
-// deltas. Therefore, we need to store the "last" values of scale, x and y so that we can
-// adjust the UI accordingly. It isn't until the "pinchend" and "panend" events are received
-// that we can set the "last" values.
-// Our "raw" coordinates are not scaled. This allows us to only have to modify our stored
-// coordinates when the UI is updated. It also simplifies our calculations as these
-// coordinates are without respect to the current scale.
-var imgWidth = null;
-var imgHeight = null;
-var viewportWidth = null;
-var viewportHeight = null;
-var scale = null;
-var lastScale = null;
-var container = null;
-var img = null;
-var x = 0;
-var lastX = 0;
-var y = 0;
-var lastY = 0;
-var pinchCenter = null;
-// We need to disable the following event handlers so that the browser doesn't try to
-// automatically handle our image drag gestures.
-var disableImgEventHandlers = function () {
-  var events = ['onclick', 'onmousedown', 'onmousemove', 'onmouseout', 'onmouseover',
-                'onmouseup', 'ondblclick', 'onfocus', 'onblur'];
-  events.forEach(function (event) {
-    img[event] = function () {
-      return false;
-    };
-  });
-};
+//New variables
+var imgWidth = -1;
+var imgHeight = -1;
 
-var menuHeight = $( '.wz-view-menu', win ).outerHeight();
-
-// Valid zoom
-var validZoom = [ 0.01, 0.02, 0.03, 0.04, 0.06, 0.08, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.75, 1, 1.5, 2, 3, 4, 5 ];
 
 // Private Methods
 var asyncEach = function( list, step, callback ){
@@ -111,9 +77,9 @@ var asyncEach = function( list, step, callback ){
 
 };
 
-var _preciseDecimal = function( number ){
+/*var _preciseDecimal = function( number ){
     return Math.floor(number * 100) / 100;
-};
+};*/
 
 var _startApp = function( paramsArg ){
 
@@ -272,41 +238,45 @@ var _loadImage = function( file ){
 
   if ( file.dropbox ) {
 
-    var width  = parseInt( file.media_info.metadata.dimensions.width, 10 );
-    var height = parseInt( file.media_info.metadata.dimensions.height, 10 );
+    imgWidth  = parseInt( file.media_info.metadata.dimensions.width, 10 );
+    imgHeight = parseInt( file.media_info.metadata.dimensions.height, 10 );
 
   }else if ( file.gdrive ){
 
-    var width  = parseInt( file.imageMediaMetadata.width, 10 );
-    var height = parseInt( file.imageMediaMetadata.height, 10 );
+    imgWidth  = parseInt( file.imageMediaMetadata.width, 10 );
+    imgHeight = parseInt( file.imageMediaMetadata.height, 10 );
 
   }else if( file.onedrive ){
 
-    var width  = parseInt( file.image.width, 10 );
-    var height = parseInt( file.image.height, 10 );
+    imgWidth  = parseInt( file.image.width, 10 );
+    imgHeight = parseInt( file.image.height, 10 );
 
   }else if( ['video/x-theora+ogg', 'video/x-msvideo', 'video/x-ms-wmv', 'video/x-ms-asf', 'video/x-matroska', 'video/x-flv', 'video/webm', 'video/quicktime', 'video/mp4', 'video/3gpp' ].indexOf( file.mime ) !== -1 ){
 
-    var width  = parseInt( file.formats.original.metadata.media.video.resolution.w, 10 );
-    var height = parseInt( file.formats.original.metadata.media.video.resolution.h, 10 );
+    console.log(parseInt( file.formats[file.mime].metadata.media.video.resolution.w, 10 ), parseInt( file.formats[file.mime].metadata.media.video.resolution.h, 10 ))
+    imgWidth  = parseInt( file.formats[file.mime].metadata.media.video.resolution.w, 10 );
+    imgHeight = parseInt( file.formats[file.mime].metadata.media.video.resolution.h, 10 );
 
   }else{
-    var width  = parseInt( file.formats.original.metadata.exif.imageWidth, 10 );
-    var height = parseInt( file.formats.original.metadata.exif.imageHeight, 10 );
+    imgWidth  = parseInt( file.formats.original.metadata.exif.imageWidth, 10 );
+    imgHeight = parseInt( file.formats.original.metadata.exif.imageHeight, 10 );
   }
 
-  var scale1 = zone.width() / width ;
-  var scale2 = zone.height() / height ;
+  var scale1 = zone.width() / imgWidth ;
+  var scale2 = zone.height() / imgHeight ;
 
-  if( scale1 < scale2 ){
+  scale = (scale1 < scale2) ? scale1 : scale2
+
+  /*if( scale1 < scale2 ){
     scale = scale1;
   }else{
     scale = scale2;
-  }
+  }*/
 
   if( scale > 1 ){
     scale = 1;
   }
+
 
   zoom = -1;
   normalZoom = -1;
@@ -315,7 +285,7 @@ var _loadImage = function( file ){
 
   if( mobile ){
     //Si es mobile cargamos la preview
-    $( '.weevisor-images img').attr( 'src', file.icons[ 512 ] );
+    $( '.weevisor-images img').attr( 'src', file.icons[1024] );
   }else{
     if( file.dropbox ){
       $( '.weevisor-images img').attr( 'src', 'https://download.horbito.com/dropbox/' + file.account + '/' + encodeURIComponent( file.id ) );
@@ -335,60 +305,38 @@ var _scaleImage = function( scaleArg ){
 
   //scale = _preciseDecimal( parseFloat( scaleArg, 10 ) );
   scale = scaleArg;
+  var dimensionsFront = []
 
   if( isNaN( scale ) || scale <= 0 || scale > 5 ){
     return false;
   }
 
-  if ( imageLoaded.dropbox ) {
+  console.log(scale, imgWidth, imgHeight)
+  dimensionsFront[0] = parseInt( scale * imgWidth, 10 )
+  dimensionsFront[1] = parseInt( scale * imgHeight, 10 )
 
-    $( 'img', zone )
-      .width( parseInt( scale * imageLoaded.media_info.metadata.dimensions.width, 10 ) )
-      .height( parseInt( scale * imageLoaded.media_info.metadata.dimensions.height, 10 ) );
+  $( 'img', zone )
+    .width( dimensionsFront[0] )
+    .height( dimensionsFront[1] );
 
-  }else if ( imageLoaded.gdrive ){
-
-    $( 'img', zone )
-      .width( parseInt( scale * imageLoaded.imageMediaMetadata.width, 10 ) )
-      .height( parseInt( scale * imageLoaded.imageMediaMetadata.height, 10 ) );
-
-  }else if( imageLoaded.onedrive ) {
-
-    $( 'img', zone )
-      .width( parseInt( scale * imageLoaded.image.width, 10 ) )
-      .height( parseInt( scale * imageLoaded.image.height, 10 ) );
-
-  }else if( ['video/x-theora+ogg', 'video/x-msvideo', 'video/x-ms-wmv', 'video/x-ms-asf', 'video/x-matroska', 'video/x-flv', 'video/webm', 'video/quicktime', 'video/mp4', 'video/3gpp' ].indexOf( imageLoaded.mime ) !== -1 ){
-
-    $( 'img', zone )
-        .width( parseInt( scale * imageLoaded.formats.original.metadata.media.video.resolution.w, 10 ) )
-        .height( parseInt( scale * imageLoaded.formats.original.metadata.media.video.resolution.h, 10 ) );    
-
-  }else{
-
-    $( 'img', zone )
-        .width( parseInt( scale * imageLoaded.formats.original.metadata.exif.imageWidth, 10 ) )
-        .height( parseInt( scale * imageLoaded.formats.original.metadata.exif.imageHeight, 10 ) );
-
-  }
-
-  zoomUi.val( _preciseDecimal( scale * 100 ) );
+  //zoomUi.val( _preciseDecimal( scale * 100 ) );
 
   _marginImage();
-  _detectCursor();
+  //_detectCursor();
 
 };
 
 var _marginImage = function(){
 
   var img   = $( 'img', zone );
+  console.log(zone.height(),img.height(),zone.height() - img.height())
   var scale = ( zone.height() - img.height() ) / 2;
 
   img.css( 'margin-top', scale > 0 ? scale : 0 );
 
 };
 
-var _scaleButton = function( dir ){
+/*var _scaleButton = function( dir ){
 
   if( zoom === -1 || win.hasClass('fullscreen') ){
 
@@ -448,9 +396,9 @@ var _scaleButton = function( dir ){
 
   }
 
-};
+};*/
 
-var _detectCursor = function(){
+/*var _detectCursor = function(){
 
   var img = $( 'img', zone );
 
@@ -460,10 +408,10 @@ var _detectCursor = function(){
     zone.removeClass('hide-hand');
   }
 
-};
+};*/
 
 /* fullscreen mode */
-var toggleFullscreen = function(){
+/*var toggleFullscreen = function(){
 
   if( win.hasClass( 'fullscreen' ) ){
 
@@ -488,9 +436,9 @@ var toggleFullscreen = function(){
 
   }
 
-};
+};*/
 
-var showControls = function(){
+/*var showControls = function(){
 
   uiBarTop.stop().clearQueue();
   uiBarTop.css( 'display', 'block' );
@@ -502,12 +450,12 @@ var hideControls = function(){
   uiBarTop.stop().clearQueue();
   uiBarTop.css( 'display' , 'none' );
 
-};
+};*/
 
 win
-.on( 'click', '.ui-fullscreen', function(){
+/*.on( 'click', '.ui-fullscreen', function(){
     toggleFullscreen();
-})
+})*/
 
 .on('click', '.ui-footer .prev-btn', function(){
 
@@ -549,7 +497,7 @@ win
 
 })
 
-.on( 'enterfullscreen', function(){
+/*.on( 'enterfullscreen', function(){
 
   win.addClass('fullscreen');
   loader.addClass('fullscreen');
@@ -621,13 +569,15 @@ win
 
   }
 
-})
+})*/
 
 .on( 'swiperight', function(){
+  console.log('swiperight',prevBtn)
   prevBtn.click();
 })
 
 .on( 'swipeleft', function(){
+  console.log('swipeleft',nextBtn)
   nextBtn.click();
 })
 
@@ -642,11 +592,11 @@ win
   e.stopPropagation();
 })
 
-.on( 'ui-view-resize ui-view-maximize ui-view-unmaximize', function(){
+/*.on( 'ui-view-resize ui-view-maximize ui-view-unmaximize', function(){
 
   _marginImage();
 
-})
+})*/
 /*.key( 'left, pageup', function(){
   prevBtn.click();
 })
@@ -663,7 +613,7 @@ win
     minus.click();
 })*/
 
-minus
+/*minus
 .on( 'click', function(){
 
   var zoom2   = zoom;
@@ -672,17 +622,6 @@ minus
   var resize  = ( zone[ 0 ].scrollWidth - zone[ 0 ].offsetWidth ) || ( zone[ 0 ].scrollHeight - zone[ 0 ].offsetHeight );
 
   if( resize ){
-
-    /*
-     *
-     * Las siguientes variables se han puesto diimgDomamente en la fórmula para no declarar variables que solo se usan una vez
-     *
-     * var posX   = e.clientX - offset.left;
-     * var posY   = e.clientY - offset.top - menuHeight;
-     *
-     * Es la posición del ratón dentro de la zona de la imagen
-     *
-     */
 
     var perX = ( zone[ 0 ].scrollLeft + ( zone[ 0 ].offsetWidth / 2 ) ) / zone[ 0 ].scrollWidth;
     var perY = ( zone[ 0 ].scrollTop + ( zone[ 0 ].offsetHeight / 2 ) ) / zone[ 0 ].scrollHeight;
@@ -726,17 +665,6 @@ plus
   var resize  = ( zone[ 0 ].scrollWidth - zone[ 0 ].offsetWidth ) || ( zone[ 0 ].scrollHeight - zone[ 0 ].offsetHeight );
 
   if( resize || zoom === -1 ){
-
-    /*
-     *
-     * Las siguientes variables se han puesto diimgDomamente en la fórmula para no declarar variables que solo se usan una vez
-     *
-     * var posX   = e.clientX - offset.left;
-     * var posY   = e.clientY - offset.top - menuHeight;
-     *
-     * Es la posición del ratón dentro de la zona de la imagen
-     *
-     */
 
     var perX = ( zone[ 0 ].scrollLeft + ( zone[ 0 ].offsetWidth / 2 ) ) / zone[ 0 ].scrollWidth;
     var perY = ( zone[ 0 ].scrollTop + ( zone[ 0 ].offsetHeight / 2 ) ) / zone[ 0 ].scrollHeight;
@@ -792,17 +720,6 @@ zone
 
   if( resize || zoom === -1 ){
 
-    /*
-     *
-     * Las siguientes variables se han puesto diimgDomamente en la fórmula para no declarar variables que solo se usan una vez
-     *
-     * var posX   = e.clientX - offset.left;
-     * var posY   = e.clientY - offset.top - menuHeight;
-     *
-     * Es la posición del ratón dentro de la zona de la imagen
-     *
-     */
-
     var offset = win.offset();
     var perX   = ( this.scrollLeft + ( e.clientX - offset.left ) ) / this.scrollWidth;
     var perY   = ( this.scrollTop + ( e.clientY - offset.top - menuHeight ) ) / this.scrollHeight;
@@ -818,16 +735,16 @@ zone
   // Si no se comprueba el zoom se pueden emular desplazamientos, esto lo previene
   if( zoom2 !== zoom ){
 
-      if( resize || zoom === -1 ){
+    if( resize || zoom === -1 ){
 
-        scrollX = ( this.scrollWidth * perX ) - ( this.offsetWidth * perX );
-        scrollY = ( this.scrollHeight * perY ) - ( this.offsetHeight * perY );
+      scrollX = ( this.scrollWidth * perX ) - ( this.offsetWidth * perX );
+      scrollY = ( this.scrollHeight * perY ) - ( this.offsetHeight * perY );
 
-      }
+    }
 
-      $(this)
-        .scrollLeft( scrollX )
-        .scrollTop( scrollY );
+    $(this)
+      .scrollLeft( scrollX )
+      .scrollTop( scrollY );
 
   }
 
@@ -841,202 +758,11 @@ presentationBtn.on('click', function(){
     nextBtn.click();
   }, 3000);
 
-
 });
 
 if( location.host.indexOf('file') !== -1 ){
   api.app.maximizeView( win );
-}
-
-// Traverse the DOM to calculate the absolute position of an element
-/*
-var absolutePosition = function (el) {
-
-  var x = 0,
-    y = 0;
-  while (el[0] !== null) {
-    x += el[0].offsetLeft;
-    y += el[0].offsetTop;
-    el[0] = el[0].offsetParent;
-  }
-  return { x: x, y: y };
-
-};
-var restrictScale = function (scale) {
-
-  if (scale < MIN_SCALE) {
-    scale = MIN_SCALE;
-  } else if (scale > MAX_SCALE) {
-    scale = MAX_SCALE;
-  }
-  return scale;
-
-};
-var restrictRawPos = function (pos, viewportDim, imgDim) {
-
-  if (pos < viewportDim/scale - imgDim) { // too far left/up?
-    pos = viewportDim/scale - imgDim;
-  } else if (pos > 0) { // too far right/down?
-    pos = 0;
-  }
-  return pos;
-
-};
-var updateLastPos = function (deltaX, deltaY) {
-
-  lastX = x;
-  lastY = y;
-
-};
-var translate = function (deltaX, deltaY) {
-
-  // We restrict to the min of the viewport width/height or current width/height as the
-  // current width/height may be smaller than the viewport width/height
-  var newX = restrictRawPos(lastX + deltaX/scale,
-                            Math.min(viewportWidth, curWidth), imgWidth);
-  x = newX;
-  img.css('marginLeft', Math.ceil(newX*scale) + 'px');
-  var newY = restrictRawPos(lastY + deltaY/scale,
-                            Math.min(viewportHeight, curHeight), imgHeight);
-  y = newY;
-
-  var scale3 = ( viewportHeight - img.height() ) / 2;
-  img.css('marginTop', scale3 > 0 ? scale3 : Math.ceil(newY*scale3) );
-
-};
-var zoomMobile = function (scaleBy) {
-
-  scale = restrictScale(lastScale*scaleBy);
-  curWidth = imgWidth*scale;
-  curHeight = imgHeight*scale;
-  img.css('width', Math.ceil(curWidth) + 'px');
-  img.css('height', Math.ceil(curHeight) + 'px');
-  // Adjust margins to make sure that we aren't out of bounds
-  translate(0, 0);
-
-};
-var rawCenter = function (e) {
-
-  var pos = absolutePosition(container);
-  // We need to account for the scroll position
-  var scrollLeft = win.pageXOffset ? win.pageXOffset : win.scrollLeft();
-  var scrollTop = win.pageYOffset ? win.pageYOffset : win.scrollTop();
-  var zoomX = -x + (e.gesture.center.x - pos.x + scrollLeft)/scale;
-  var zoomY = -y + (e.gesture.center.y - pos.y + scrollTop)/scale;
-  return { x: zoomX, y: zoomY };
-
-};
-var updateLastScale = function () {
-  lastScale = scale;
-};
-var zoomAround = function (scaleBy, rawZoomX, rawZoomY, doNotUpdateLast) {
-
-  // Zoom
-  zoomMobile(scaleBy);
-  // New raw center of viewport
-  var rawCenterX = -x + Math.min(viewportWidth, curWidth)/2/scale;
-  var rawCenterY = -y + Math.min(viewportHeight, curHeight)/2/scale;
-  // Delta
-  var deltaX = (rawCenterX - rawZoomX)*scale;
-  var deltaY = (rawCenterY - rawZoomY)*scale;
-  // Translate back to zoom center
-  translate(deltaX, deltaY);
-  if (!doNotUpdateLast) {
-    updateLastScale();
-    updateLastPos();
-  }
-
-};
-var zoomCenter = function (scaleBy) {
-
-  // Center of viewport
-  var zoomX = -x + Math.min(viewportWidth, curWidth)/2/scale;
-  var zoomY = -y + Math.min(viewportHeight, curHeight)/2/scale;
-  zoomAround(scaleBy, zoomX, zoomY);
-
-};
-var zoomIn = function () {
-  zoomCenter(2);
-};
-var zoomOut = function () {
-  zoomCenter(1/2);
-};
-var startMobile = function () {
-
-  img = imgDom;
-  container = $('.weevisor-images' );
-  disableImgEventHandlers();
-  imgWidth = parseInt( img.css('width') );
-  imgHeight = parseInt( img.css('height') );
-  viewportWidth = parseInt( container.css('width') );
-  scale = viewportWidth/imgWidth;
-  lastScale = scale;
-  viewportHeight = parseInt( container.css('height') );
-  curWidth = imgWidth*scale;
-  curHeight = imgHeight*scale;
-  var isZoomed = false;
-
-  win.on('pan', function (e) {
-    translate(e.originalEvent.gesture.deltaX, e.originalEvent.gesture.deltaY);
-  })
-  .on('panend', function (e) {
-    updateLastPos();
-  })
-  .on('pinch', function (e) {
-
-    // We only calculate the pinch center on the first pinch event as we want the center to
-    // stay consistent during the entire pinch
-    if (pinchCenter === null) {
-
-      pinchCenter = rawCenter(e.originalEvent);
-      var offsetX = pinchCenter.x*scale - (-x*scale + Math.min(viewportWidth, curWidth)/2);
-      var offsetY = pinchCenter.y*scale - (-y*scale + Math.min(viewportHeight, curHeight)/2);
-      pinchCenterOffset = { x: offsetX, y: offsetY };
-
-    }
-    // When the user pinch zooms, she/he expects the pinch center to remain in the same
-    // relative location of the screen. To achieve this, the raw zoom center is calculated by
-    // first storing the pinch center and the scaled offset to the current center of the
-    // image. The new scale is then used to calculate the zoom center. This has the effect of
-    // actually translating the zoom center on each pinch zoom event.
-    var newScale = restrictScale(scale*e.originalEvent.gesture.scale);
-    var zoomX = pinchCenter.x*newScale - pinchCenterOffset.x;
-    var zoomY = pinchCenter.y*newScale - pinchCenterOffset.y;
-    var zoomCenter = { x: zoomX/newScale, y: zoomY/newScale };
-    zoomAround(e.originalEvent.gesture.scale, zoomCenter.x, zoomCenter.y, true);
-
-  })
-
-  .on('pinchend', function (e) {
-
-    updateLastScale();
-    updateLastPos();
-    pinchCenter = null;
-
-  })
-
-  .on('doubletap', function (e) {
-
-    if( !isZoomed ){
-
-      var c = rawCenter(e.originalEvent);
-      zoomAround(2, c.x, c.y);
-      console.log(img);
-      var scale3 = ( viewportHeight - img.height() ) / 2;
-      console.log(scale3);
-      img.css( 'margin-top', scale3 > 0 ? scale3 : 0 );
-      isZoomed=true;
-
-    }else{
-
-      zoomOut();
-      a=false;
-
-    }
-
-  });
-};
-*/
+}*/
 
 console.log('llego al evento')
 
