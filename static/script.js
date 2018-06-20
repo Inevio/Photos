@@ -446,55 +446,55 @@ var _scaleButton = function( dir ){
 
 var _detectCursor = function(){
 
-    var img = $( 'img', zone );
+  var img = $( 'img', zone );
 
-    if( img.height() <= zone.height() && img.width() <= zone.width() ){
-      zone.addClass('hide-hand');
-    }else{
-      zone.removeClass('hide-hand');
-    }
+  if( img.height() <= zone.height() && img.width() <= zone.width() ){
+    zone.addClass('hide-hand');
+  }else{
+    zone.removeClass('hide-hand');
+  }
 
 };
 
 /* fullscreen mode */
 var toggleFullscreen = function(){
 
-    if( win.hasClass( 'fullscreen' ) ){
+  if( win.hasClass( 'fullscreen' ) ){
 
-      api.tool.exitFullscreen();
+    api.tool.exitFullscreen();
 
+  }else{
+
+    if( win[ 0 ].requestFullScreen ){
+        win[ 0 ].requestFullScreen();
+    }else if( win[ 0 ].webkitRequestFullScreen ){
+        win[ 0 ].webkitRequestFullScreen();
+    }else if( win[ 0 ].mozRequestFullScreen ){
+        win[ 0 ].mozRequestFullScreen();
     }else{
-
-      if( win[ 0 ].requestFullScreen ){
-          win[ 0 ].requestFullScreen();
-      }else if( win[ 0 ].webkitRequestFullScreen ){
-          win[ 0 ].webkitRequestFullScreen();
-      }else if( win[ 0 ].mozRequestFullScreen ){
-          win[ 0 ].mozRequestFullScreen();
-      }else{
-          alert( lang.fullscreenSupport );
-      }
-
-      normalWidth  = win.width();
-      normalHeight = win.height();
-      normalScale  = scale;
-      normalZoom   = zoom;
-
+        alert( lang.fullscreenSupport );
     }
+
+    normalWidth  = win.width();
+    normalHeight = win.height();
+    normalScale  = scale;
+    normalZoom   = zoom;
+
+  }
 
 };
 
 var showControls = function(){
 
-    uiBarTop.stop().clearQueue();
-    uiBarTop.css( 'display', 'block' );
+  uiBarTop.stop().clearQueue();
+  uiBarTop.css( 'display', 'block' );
 
 };
 
 var hideControls = function(){
 
-    uiBarTop.stop().clearQueue();
-    uiBarTop.css( 'display' , 'none' );
+  uiBarTop.stop().clearQueue();
+  uiBarTop.css( 'display' , 'none' );
 
 };
 
@@ -545,54 +545,54 @@ win
 
 .on( 'enterfullscreen', function(){
 
-    win.addClass('fullscreen');
-    loader.addClass('fullscreen');
+  win.addClass('fullscreen');
+  loader.addClass('fullscreen');
 
-    win.css( 'width', screen.width );
-    win.css( 'height', screen.height );
+  win.css( 'width', screen.width );
+  win.css( 'height', screen.height );
 
-    var width  = parseInt( imageLoaded.formats.original.metadata.exif.imageWidth, 10 );
-    var height = parseInt( imageLoaded.formats.original.metadata.exif.imageHeight, 10 );
+  var width  = parseInt( imageLoaded.formats.original.metadata.exif.imageWidth, 10 );
+  var height = parseInt( imageLoaded.formats.original.metadata.exif.imageHeight, 10 );
 
-    var scale1 = screen.width / width ;
-    var scale2 = screen.height / height ;
+  var scale1 = screen.width / width ;
+  var scale2 = screen.height / height ;
 
-    if( scale1 < scale2 ){
-      scale = scale1;
-    }else{
-      scale = scale2;
-    }
+  if( scale1 < scale2 ){
+    scale = scale1;
+  }else{
+    scale = scale2;
+  }
 
-    if( scale > 1 ){
-      scale = 1;
-    }
+  if( scale > 1 ){
+    scale = 1;
+  }
 
-    zoom = -1;
+  zoom = -1;
 
-    hideControls();
-    _scaleImage( scale );
-    zoomUi.val( scale * 100 );
+  hideControls();
+  _scaleImage( scale );
+  zoomUi.val( scale * 100 );
 
 })
 
 .on( 'exitfullscreen', function(){
 
-    if( presentationMode ){
-      //clearInterval(presInterval);
-      presentationMode=false;
-    }
+  if( presentationMode ){
+    //clearInterval(presInterval);
+    presentationMode=false;
+  }
 
-    win.removeClass('fullscreen');
-    loader.removeClass('fullscreen');
+  win.removeClass('fullscreen');
+  loader.removeClass('fullscreen');
 
-    win.css( 'width', normalWidth );
-    win.css( 'height', normalHeight );
+  win.css( 'width', normalWidth );
+  win.css( 'height', normalHeight );
 
-    showControls();
+  showControls();
 
-    _scaleImage( normalScale );
-    zoom = normalZoom;
-    zoomUi.val( _preciseDecimal( normalScale * 100 ) );
+  _scaleImage( normalScale );
+  zoom = normalZoom;
+  zoomUi.val( _preciseDecimal( normalScale * 100 ) );
 
 })
 
@@ -606,14 +606,14 @@ win
 
 .on( 'mousemove', function( e ){
 
-    if( e.clientX !== prevClientX || e.clientY !== prevClientY ){
+  if( e.clientX !== prevClientX || e.clientY !== prevClientY ){
 
-        prevClientX = e.clientX;
-        prevClientY = e.clientY;
+    prevClientX = e.clientX;
+    prevClientY = e.clientY;
 
-        clearTimeout( 0 );
+    clearTimeout( 0 );
 
-    }
+  }
 
 })
 
@@ -661,46 +661,46 @@ win
 minus
 .on( 'click', function(){
 
-    var zoom2   = zoom;
-    var scrollX = 0;
-    var scrollY = 0;
-    var resize  = ( zone[ 0 ].scrollWidth - zone[ 0 ].offsetWidth ) || ( zone[ 0 ].scrollHeight - zone[ 0 ].offsetHeight );
+  var zoom2   = zoom;
+  var scrollX = 0;
+  var scrollY = 0;
+  var resize  = ( zone[ 0 ].scrollWidth - zone[ 0 ].offsetWidth ) || ( zone[ 0 ].scrollHeight - zone[ 0 ].offsetHeight );
+
+  if( resize ){
+
+    /*
+     *
+     * Las siguientes variables se han puesto diimgDomamente en la fórmula para no declarar variables que solo se usan una vez
+     *
+     * var posX   = e.clientX - offset.left;
+     * var posY   = e.clientY - offset.top - menuHeight;
+     *
+     * Es la posición del ratón dentro de la zona de la imagen
+     *
+     */
+
+    var perX = ( zone[ 0 ].scrollLeft + ( zone[ 0 ].offsetWidth / 2 ) ) / zone[ 0 ].scrollWidth;
+    var perY = ( zone[ 0 ].scrollTop + ( zone[ 0 ].offsetHeight / 2 ) ) / zone[ 0 ].scrollHeight;
+
+  }
+
+  _scaleButton( -1 );
+
+  // Si no se comprueba el zoom se pueden emular desplazamientos, esto lo previene
+  if( zoom2 !== zoom ){
 
     if( resize ){
 
-        /*
-         *
-         * Las siguientes variables se han puesto diimgDomamente en la fórmula para no declarar variables que solo se usan una vez
-         *
-         * var posX   = e.clientX - offset.left;
-         * var posY   = e.clientY - offset.top - menuHeight;
-         *
-         * Es la posición del ratón dentro de la zona de la imagen
-         *
-         */
-
-        var perX = ( zone[ 0 ].scrollLeft + ( zone[ 0 ].offsetWidth / 2 ) ) / zone[ 0 ].scrollWidth;
-        var perY = ( zone[ 0 ].scrollTop + ( zone[ 0 ].offsetHeight / 2 ) ) / zone[ 0 ].scrollHeight;
+      scrollX = ( zone[ 0 ].scrollWidth * perX ) - ( zone[ 0 ].offsetWidth * perX );
+      scrollY = ( zone[ 0 ].scrollHeight * perY ) - ( zone[ 0 ].offsetHeight * perY );
 
     }
 
-    _scaleButton( -1 );
+    zone
+      .scrollLeft( scrollX )
+      .scrollTop( scrollY );
 
-    // Si no se comprueba el zoom se pueden emular desplazamientos, esto lo previene
-    if( zoom2 !== zoom ){
-
-        if( resize ){
-
-            scrollX = ( zone[ 0 ].scrollWidth * perX ) - ( zone[ 0 ].offsetWidth * perX );
-            scrollY = ( zone[ 0 ].scrollHeight * perY ) - ( zone[ 0 ].offsetHeight * perY );
-
-        }
-
-        zone
-            .scrollLeft( scrollX )
-            .scrollTop( scrollY );
-
-    }
+  }
 
 });
 
@@ -715,61 +715,61 @@ original.on('click', function(){
 plus
 .on( 'click', function(){
 
-    var zoom2    = zoom;
-    var scrollX = 0;
-    var scrollY = 0;
-    var resize  = ( zone[ 0 ].scrollWidth - zone[ 0 ].offsetWidth ) || ( zone[ 0 ].scrollHeight - zone[ 0 ].offsetHeight );
+  var zoom2    = zoom;
+  var scrollX = 0;
+  var scrollY = 0;
+  var resize  = ( zone[ 0 ].scrollWidth - zone[ 0 ].offsetWidth ) || ( zone[ 0 ].scrollHeight - zone[ 0 ].offsetHeight );
+
+  if( resize || zoom === -1 ){
+
+    /*
+     *
+     * Las siguientes variables se han puesto diimgDomamente en la fórmula para no declarar variables que solo se usan una vez
+     *
+     * var posX   = e.clientX - offset.left;
+     * var posY   = e.clientY - offset.top - menuHeight;
+     *
+     * Es la posición del ratón dentro de la zona de la imagen
+     *
+     */
+
+    var perX = ( zone[ 0 ].scrollLeft + ( zone[ 0 ].offsetWidth / 2 ) ) / zone[ 0 ].scrollWidth;
+    var perY = ( zone[ 0 ].scrollTop + ( zone[ 0 ].offsetHeight / 2 ) ) / zone[ 0 ].scrollHeight;
+
+  }
+
+  _scaleButton( 1 );
+
+  // Si no se comprueba el zoom se pueden emular desplazamientos, esto lo previene
+  if( zoom2 !== zoom ){
 
     if( resize || zoom === -1 ){
 
-        /*
-         *
-         * Las siguientes variables se han puesto diimgDomamente en la fórmula para no declarar variables que solo se usan una vez
-         *
-         * var posX   = e.clientX - offset.left;
-         * var posY   = e.clientY - offset.top - menuHeight;
-         *
-         * Es la posición del ratón dentro de la zona de la imagen
-         *
-         */
-
-        var perX = ( zone[ 0 ].scrollLeft + ( zone[ 0 ].offsetWidth / 2 ) ) / zone[ 0 ].scrollWidth;
-        var perY = ( zone[ 0 ].scrollTop + ( zone[ 0 ].offsetHeight / 2 ) ) / zone[ 0 ].scrollHeight;
+      scrollX = ( zone[ 0 ].scrollWidth * perX ) - ( zone[ 0 ].offsetWidth * perX );
+      scrollY = ( zone[ 0 ].scrollHeight * perY ) - ( zone[ 0 ].offsetHeight * perY );
 
     }
 
-    _scaleButton( 1 );
+    zone
+      .scrollLeft( scrollX )
+      .scrollTop( scrollY );
 
-    // Si no se comprueba el zoom se pueden emular desplazamientos, esto lo previene
-    if( zoom2 !== zoom ){
-
-        if( resize || zoom === -1 ){
-
-            scrollX = ( zone[ 0 ].scrollWidth * perX ) - ( zone[ 0 ].offsetWidth * perX );
-            scrollY = ( zone[ 0 ].scrollHeight * perY ) - ( zone[ 0 ].offsetHeight * perY );
-
-        }
-
-        zone
-            .scrollLeft( scrollX )
-            .scrollTop( scrollY );
-
-    }
+  }
 
 });
 
 zoomUi
 .on( 'change', function(){
 
-    var value = _preciseDecimal( zoomUi.val() / 100 );
+  var value = _preciseDecimal( zoomUi.val() / 100 );
 
-    zoom = -1;
+  zoom = -1;
 
-    _scaleImage( value );
+  _scaleImage( value );
 
-    zoomUi
-        .val( _preciseDecimal( scale * 100 ) )
-        .blur(); // To Do -> Provoca que se vuelva a invocar el evento al dar a intro
+  zoomUi
+    .val( _preciseDecimal( scale * 100 ) )
+    .blur(); // To Do -> Provoca que se vuelva a invocar el evento al dar a intro
 
 });
 
