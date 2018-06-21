@@ -100,9 +100,13 @@
 }
 
 .weevisor-images img{
-    display: inline-block;
-    position: relative;
-    z-index: 2;
+  display: none;
+  position: relative;
+  z-index: 2;
+}
+
+.weevisor-images img.active{
+  display: inline-block;
 }
 
 .weevisor-images .loader{
@@ -180,6 +184,16 @@
 
 .weevisor-images.hide-hand, .weevisor-images.hide-hand *{
     cursor: default;
+}
+
+.video{
+  width: 100%;
+  height: 100%;
+  display: none;
+}
+
+.video.active{
+  display: inline-block;
 }
 
 /* fullscreen mode */

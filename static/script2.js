@@ -46,9 +46,9 @@ if( mobile ){
 }
 
 //New variables
-var imgWidth = -1;
-var imgHeight = -1;
-
+var imgWidth = -1
+var imgHeight = -1
+var isVideo = false
 
 // Private Methods
 var asyncEach = function( list, step, callback ){
@@ -243,80 +243,96 @@ var _loadImage = function( file ){
 
   console.log(file)
   $( '.ui-header-brand span', win ).text( file.name );
-  imageLoaded = file;
+  isVideo = (['video/x-theora+ogg', 'video/x-msvideo', 'video/x-ms-wmv', 'video/x-ms-asf', 'video/x-matroska', 'video/x-flv', 'video/webm', 'video/quicktime', 'video/mp4', 'video/3gpp' ].indexOf( file.mime ) !== -1)
 
-  if ( file.dropbox ) {
+  if( isVideo ){
 
-    imgWidth  = parseInt( file.media_info.metadata.dimensions.width, 10 );
-    imgHeight = parseInt( file.media_info.metadata.dimensions.height, 10 );
-
-  }else if ( file.gdrive ){
-
-    imgWidth  = parseInt( file.imageMediaMetadata.width, 10 );
-    imgHeight = parseInt( file.imageMediaMetadata.height, 10 );
-
-  }else if( file.onedrive ){
-
-    imgWidth  = parseInt( file.image.width, 10 );
-    imgHeight = parseInt( file.image.height, 10 );
-
-  }else if( ['video/x-theora+ogg', 'video/x-msvideo', 'video/x-ms-wmv', 'video/x-ms-asf', 'video/x-matroska', 'video/x-flv', 'video/webm', 'video/quicktime', 'video/mp4', 'video/3gpp' ].indexOf( file.mime ) !== -1 ){
-
-    console.log(parseInt( file.formats[file.mime].metadata.media.video.resolution.w, 10 ), parseInt( file.formats[file.mime].metadata.media.video.resolution.h, 10 ))
-    imgWidth  = parseInt( file.formats[file.mime].metadata.media.video.resolution.w, 10 );
-    imgHeight = parseInt( file.formats[file.mime].metadata.media.video.resolution.h, 10 );
+    $('.video').attr('poster', file.icons[1024])
+    $('.video').attr('src', file.formats['video/mp4'].url)
+    loader.hide();
+    $('img').removeClass('active')
+    $('.video').addClass('active')
 
   }else{
-    imgWidth  = parseInt( file.formats.original.metadata.exif.imageWidth, 10 );
-    imgHeight = parseInt( file.formats.original.metadata.exif.imageHeight, 10 );
-  }
 
-  var scale1 = zone.width() / imgWidth ;
-  var scale2 = zone.height() / imgHeight ;
+    $('.video').removeClass('active')
+    $('img').addClass('active')
+    $('.video').attr('src', '')
+    imageLoaded = file;
 
-  scale = (scale1 < scale2) ? scale1 : scale2
+    if ( file.dropbox ) {
 
-  /*if( scale1 < scale2 ){
-    scale = scale1;
-  }else{
-    scale = scale2;
-  }*/
+      imgWidth  = parseInt( file.media_info.metadata.dimensions.width, 10 );
+      imgHeight = parseInt( file.media_info.metadata.dimensions.height, 10 );
 
-  if( scale > 1 ){
-    scale = 1;
-  }
+    }else if ( file.gdrive ){
 
+      imgWidth  = parseInt( file.imageMediaMetadata.width, 10 );
+      imgHeight = parseInt( file.imageMediaMetadata.height, 10 );
 
-  zoom = -1;
-  normalZoom = -1;
-  normalScale = scale;
-  _scaleImage( scale );
-
-  if( mobile ){
-
-    adjustScale = 1;
-    adjustDeltaX = 0;
-    adjustDeltaY = 0;
-    disabledHammerEvents = true;
-    //Si es mobile cargamos la preview
-    $( '.weevisor-images img').attr( 'src', file.icons[1024] );
-    $('img', zone).css('transform', 'scale(' + adjustScale + ') translate(' + adjustDeltaX + ',' + adjustDeltaY + ')')
-    setTimeout(function(){
-      disabledHammerEvents = false;
-    },1)
-
-  }else{
-    if( file.dropbox ){
-      $( '.weevisor-images img').attr( 'src', 'https://download.horbito.com/dropbox/' + file.account + '/' + encodeURIComponent( file.id ) );
-    }else if( file.gdrive ){
-      $( '.weevisor-images img').attr( 'src', 'https://download.horbito.com/gdrive/' + file.account + '/' + encodeURIComponent( file.id ) );
     }else if( file.onedrive ){
-      $( '.weevisor-images img').attr( 'src', 'https://download.horbito.com/onedrive/' + file.account + '/' + encodeURIComponent( file.id ) );
-    }else{
-      $( '.weevisor-images img').attr( 'src', file.formats.original.url );
-    }
-  }
 
+      imgWidth  = parseInt( file.image.width, 10 );
+      imgHeight = parseInt( file.image.height, 10 );
+
+    }else if( isVideo ){
+
+      console.log(parseInt( file.formats[file.mime].metadata.media.video.resolution.w, 10 ), parseInt( file.formats[file.mime].metadata.media.video.resolution.h, 10 ))
+      imgWidth  = parseInt( file.formats[file.mime].metadata.media.video.resolution.w, 10 );
+      imgHeight = parseInt( file.formats[file.mime].metadata.media.video.resolution.h, 10 );
+
+    }else{
+      imgWidth  = parseInt( file.formats.original.metadata.exif.imageWidth, 10 );
+      imgHeight = parseInt( file.formats.original.metadata.exif.imageHeight, 10 );
+    }
+
+    var scale1 = zone.width() / imgWidth ;
+    var scale2 = zone.height() / imgHeight ;
+
+    scale = (scale1 < scale2) ? scale1 : scale2
+
+    /*if( scale1 < scale2 ){
+      scale = scale1;
+    }else{
+      scale = scale2;
+    }*/
+
+    if( scale > 1 ){
+      scale = 1;
+    }
+
+
+    zoom = -1;
+    normalZoom = -1;
+    normalScale = scale;
+    _scaleImage( scale );
+
+    if( mobile ){
+
+      adjustScale = 1;
+      adjustDeltaX = 0;
+      adjustDeltaY = 0;
+      disabledHammerEvents = true;
+      //Si es mobile cargamos la preview
+      $( '.weevisor-images img').attr( 'src', file.icons[1024] );
+      $('img', zone).css('transform', 'scale(' + adjustScale + ') translate(' + adjustDeltaX + ',' + adjustDeltaY + ')')
+      setTimeout(function(){
+        disabledHammerEvents = false;
+      },1)
+
+    }else{
+      if( file.dropbox ){
+        $( '.weevisor-images img').attr( 'src', 'https://download.horbito.com/dropbox/' + file.account + '/' + encodeURIComponent( file.id ) );
+      }else if( file.gdrive ){
+        $( '.weevisor-images img').attr( 'src', 'https://download.horbito.com/gdrive/' + file.account + '/' + encodeURIComponent( file.id ) );
+      }else if( file.onedrive ){
+        $( '.weevisor-images img').attr( 'src', 'https://download.horbito.com/onedrive/' + file.account + '/' + encodeURIComponent( file.id ) );
+      }else{
+        $( '.weevisor-images img').attr( 'src', file.formats.original.url );
+      }
+    }
+
+  }
 
 };
 
@@ -606,7 +622,7 @@ win
 
 .on( 'pinch pan' , function(ev){
 
-  if(!disabledHammerEvents){
+  if( !disabledHammerEvents && !isVideo ){
 
     console.log(ev)
     currentScale = adjustScale * ev.originalEvent.gesture.scale;
@@ -623,7 +639,7 @@ win
 
 .on( 'pinchend panend' , function(e){
 
-  if(!disabledHammerEvents){
+  if( !disabledHammerEvents && !isVideo ){
 
     adjustScale = currentScale;
     adjustDeltaX = currentDeltaX;
