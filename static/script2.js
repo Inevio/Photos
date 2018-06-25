@@ -49,6 +49,7 @@ if( mobile ){
 var imgWidth = -1
 var imgHeight = -1
 var isVideo = false
+var params = {}
 
 // Private Methods
 var asyncEach = function( list, step, callback ){
@@ -101,6 +102,8 @@ var _startApp = function( paramsArg ){
     if( paramsArg.list.length == 0 ){
       paramsArg.list = [paramsArg.data];
     }
+
+    params = paramsArg
 
     $( '.weevisor-images img').on( 'load', function(){
 
@@ -254,6 +257,9 @@ var _loadImage = function( file ){
     loader.hide();
     $('img').removeClass('active')
     $('.video').addClass('active')
+    if( params.data === file.id ){
+      $('.video')[0].play()
+    }
 
   }else{
 
