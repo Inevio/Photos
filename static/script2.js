@@ -247,8 +247,10 @@ var _loadImage = function( file ){
 
   if( isVideo ){
 
+    $('.video').empty()
     $('.video').attr('poster', file.icons[1024])
-    $('.video').attr('src', file.formats['video/mp4'].url)
+    //$('.video').attr('src', file.formats['video/mp4'].url)
+    $('.video').append( $('<source></source>').attr('type','video/mp4').attr('src', file.formats['video/mp4'].url) )
     loader.hide();
     $('img').removeClass('active')
     $('.video').addClass('active')
@@ -257,7 +259,7 @@ var _loadImage = function( file ){
 
     $('.video').removeClass('active')
     $('img').addClass('active')
-    $('.video').attr('src', '')
+    $('.video').empty()
     imageLoaded = file;
 
     if ( file.dropbox ) {
