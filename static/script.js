@@ -152,7 +152,7 @@ var _startApp = function( paramsArg ){
     });
 
     // To Do -> Error
-    console.log( paramsArg.list )
+    //console.log( paramsArg.list )
 
     if ( paramsArg.dropbox || paramsArg.gdrive || paramsArg.onedrive ) {
       _preloadCloud( paramsArg );
@@ -249,7 +249,7 @@ var _preloadFS = function( paramsArg ){
 
   }, function(){
 
-    console.log( paramsArg.list.length, pictures.length, pictures )
+    //console.log( paramsArg.list.length, pictures.length, pictures )
 
     pictures = pictures.filter( function(item){ return item } )
 
@@ -265,6 +265,23 @@ var _preloadFS = function( paramsArg ){
     _loadImage( pictures[picIndex] )
 
   })
+
+}
+
+var _loadOriginalImage = function(file){
+
+  
+
+  var myImage = new Image()
+
+  function updateURL(){
+
+    if( imageLoaded.id !== file.id ){return}
+    $('.weevisor-images img').attr('src', myImage.src)
+  }
+
+  myImage.src = file.formats.original.url
+  myImage.onload = updateURL
 
 }
 
@@ -324,7 +341,8 @@ var _loadImage = function( file ){
     }else if( file.onedrive ){
       $( '.weevisor-images img').attr( 'src', 'https://download.horbito.com/onedrive/' + file.account + '/' + encodeURIComponent( file.id ) );
     }else{
-      $( '.weevisor-images img').attr( 'src', file.formats.original.url );
+      $( '.weevisor-images img').attr( 'src', file.icons[1024] )
+      _loadOriginalImage(file)
     }
   }
 
