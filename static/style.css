@@ -99,13 +99,13 @@
     overflow: hidden;
 }
 
-.weevisor-images img{
+.weevisor-images img, .weevisor-images figure{
   display: none;
   position: relative;
   z-index: 2;
 }
 
-.weevisor-images img.active{
+.weevisor-images img.active, .weevisor-images figure.active{
   display: inline-block;
 }
 
@@ -215,7 +215,7 @@
   background-color: black;
 }
 
-.wz-view.fullscreen .weevisor-images img{
+.wz-view.fullscreen .weevisor-images img, .wz-view.fullscreen .weevisor-images figure{
   /*max-width: 100% !important;*/
   /*height: 100%;*/
   top: 0;
