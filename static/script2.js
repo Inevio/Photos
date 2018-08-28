@@ -581,6 +581,13 @@ win
     adjustDeltaX = currentDeltaX
     adjustDeltaY = currentDeltaY
 
+    if( adjustScale === 1 ){
+      adjustDeltaX = 0
+      adjustDeltaY = 0
+    }
+
+    imgDom.css('transform', 'scale(' + adjustScale + ') translate(' + adjustDeltaX + ',' + adjustDeltaY + ')')
+
   }
 
 })
