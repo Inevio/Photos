@@ -272,6 +272,7 @@ var _loadImage = function( file ){
     $('.video').remove()
     $('.video').empty()
     imageLoaded = file
+    loader.hide()
 
     if ( file.dropbox ) {
 
@@ -513,13 +514,23 @@ win
 })*/
 
 .on( 'swiperight', function(ev){
+
+  //Disable swipe
+  if( currentScale > 1 && (Math.abs(currentDeltaX) - dimensionsFront[0]/2) < -30 ) return
+
   console.log('swiperight',prevBtn)
   prevBtn.click()
+
 })
 
 .on( 'swipeleft', function(ev){
+
+  //Disable swipe
+  if( currentScale > 1 && (Math.abs(currentDeltaX) - dimensionsFront[0]/2) < -30 ) return
+    
   console.log('swipeleft',nextBtn)
   nextBtn.click()
+
 })
 
 .on( 'pinch pan' , function(ev){
@@ -536,14 +547,14 @@ win
 
     if( currentDeltaX < 0 ){
 
-      currentDeltaX = (Math.abs(currentDeltaX) > (dimensionsFront[0]/4)*currentScale) ? (-1*dimensionsFront[0]/4)*currentScale : currentDeltaX
+      //currentDeltaX = (Math.abs(currentDeltaX) > (dimensionsFront[0]/4)*currentScale) ? (-1*dimensionsFront[0]/4)*currentScale : currentDeltaX
       if( Math.abs(currentDeltaX) > dimensionsFront[0]/2 ){
         currentDeltaX = -1*dimensionsFront[0]/2
       }
 
     }else{
 
-      currentDeltaX = (currentDeltaX > (dimensionsFront[0]/4)*currentScale) ? (dimensionsFront[0]/4)*currentScale : currentDeltaX
+      //currentDeltaX = (currentDeltaX > (dimensionsFront[0]/4)*currentScale) ? (dimensionsFront[0]/4)*currentScale : currentDeltaX
       if( currentDeltaX > dimensionsFront[0]/2 ){
         currentDeltaX = dimensionsFront[0]/2
       }
@@ -552,21 +563,21 @@ win
 
     if( currentDeltaY < 0 ){
 
-      currentDeltaY = Math.abs(currentDeltaY) > (dimensionsFront[1]/4)*currentScale ? (-1*dimensionsFront[1]/4)*currentScale : currentDeltaY
+      //currentDeltaY = Math.abs(currentDeltaY) > (dimensionsFront[1]/4)*currentScale ? (-1*dimensionsFront[1]/4)*currentScale : currentDeltaY
       if( Math.abs(currentDeltaY) > dimensionsFront[1]/2 ){
         currentDeltaY = -1*dimensionsFront[1]/2
       }
 
     }else{
 
-      currentDeltaY = currentDeltaY > (dimensionsFront[1]/4)*currentScale ? (dimensionsFront[1]/4)*currentScale : currentDeltaY
+      //currentDeltaY = currentDeltaY > (dimensionsFront[1]/4)*currentScale ? (dimensionsFront[1]/4)*currentScale : currentDeltaY
       if( currentDeltaY > dimensionsFront[1]/2 ){
         currentDeltaY = dimensionsFront[1]/2
       }
 
     }
 
-    console.log('pinch pan',currentScale, currentDeltaX, currentDeltaY, imgDom)
+    console.log('pinch pan',currentScale, currentDeltaX, currentDeltaY, dimensionsFront)
     imgDom.css('transform', 'scale(' + currentScale + ') translate(' + currentDeltaX + ',' + currentDeltaY + ')')
 
   }
