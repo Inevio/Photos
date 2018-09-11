@@ -540,9 +540,11 @@ win
     //console.log(ev)
     currentScale = adjustScale * ev.originalEvent.gesture.scale
     currentDeltaX = adjustDeltaX + (ev.originalEvent.gesture.deltaX / currentScale)
-    currentDeltaY = adjustDeltaY + (ev.originalEvent.gesture.deltaY / currentScale)
-    if( currentScale < 1 ){
+    if( currentScale <= 1 ){
       currentScale = 1
+      currentDeltaY = 0
+    }else{
+      currentDeltaY = adjustDeltaY + (ev.originalEvent.gesture.deltaY / currentScale)
     }
 
     if( currentDeltaX < 0 ){
@@ -562,19 +564,13 @@ win
     }
 
     if( currentDeltaY < 0 ){
-
-      //currentDeltaY = Math.abs(currentDeltaY) > (dimensionsFront[1]/4)*currentScale ? (-1*dimensionsFront[1]/4)*currentScale : currentDeltaY
       if( Math.abs(currentDeltaY) > dimensionsFront[1]/2 ){
         currentDeltaY = -1*dimensionsFront[1]/2
       }
-
     }else{
-
-      //currentDeltaY = currentDeltaY > (dimensionsFront[1]/4)*currentScale ? (dimensionsFront[1]/4)*currentScale : currentDeltaY
       if( currentDeltaY > dimensionsFront[1]/2 ){
         currentDeltaY = dimensionsFront[1]/2
       }
-
     }
 
     console.log('pinch pan',currentScale, currentDeltaX, currentDeltaY, dimensionsFront)
