@@ -30,6 +30,7 @@ var lastFile          = false
 var zoom
 var imageLoaded
 var scale
+var autoplayVideo = true
 var mobile = $('body').hasClass('wz-mobile-view')
 var adjustScale = 1
 var adjustDeltaX = 0
@@ -261,8 +262,9 @@ var _loadImage = function( file ){
     loader.hide()
     imgDom.removeClass('active')
     $('.video').addClass('active')
-    if( params.data === file.id ){
+    if( autoplayVideo && params.data === file.id ){
       $('.video')[0].play()
+      autoplayVideo = false
     }
 
   }else{
