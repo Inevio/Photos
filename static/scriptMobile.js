@@ -256,7 +256,7 @@ var _loadImage = function( file ){
     $('.video').remove()
     videoPrototype.clone().removeClass('wz-prototype').addClass('video').appendTo('.weevisor-images')
     $('.video').empty()
-    $('.video').attr('poster', file.icons[1024])
+    $('.video').attr('poster', file.icons[512])
     //$('.video').attr('src', file.formats['video/mp4'].url)
     $('.video').append( $('<source></source>').attr('type','video/mp4').attr('src', file.formats['video/mp4'].url) )
     loader.hide()
