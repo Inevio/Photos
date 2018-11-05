@@ -386,6 +386,10 @@
     display: none;
   }
 
+  .weevisor-content-mobile{
+    display: block;
+  }
+
   .weevisor-content{
    background-color: #f9f9fb;
    height: ~'calc(100% - 50px)';
