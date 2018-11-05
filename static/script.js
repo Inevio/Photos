@@ -4,11 +4,11 @@ var win               = $( this );
 var minus             = $( '.ui-footer .zoom-minus', win );
 var plus              = $( '.ui-footer .zoom-plus', win );
 var original          = $( '.ui-footer .zoom-original', win );
-var zone              = $( '.weevisor-images', win );
-var zoomUi            = $( '.weevisor-zoom', win );
-var imgDom            = $( '.weevisor-images img', win);
+var zone              = $( '.weevisor-content-desktop .weevisor-images', win );
+var zoomUi            = $( '.weevisor-content-desktop .weevisor-zoom', win );
+var imgDom            = $( '.weevisor-content-desktop .weevisor-images img', win);
 var uiBarTop          = $('.ui-header-desktop');
-var loader            = $('.weevisor-images .loader');
+var loader            = $('.weevisor-content-desktop .weevisor-images .loader');
 var prevBtn           = $('.ui-footer .prev-btn');
 var nextBtn           = $('.ui-footer .next-btn');
 var presentationBtn   = $('.presentation-buttons .presentation');
@@ -127,7 +127,7 @@ var _startApp = function( paramsArg ){
       paramsArg.list = [paramsArg.data];
     }
 
-    $( '.weevisor-images img').on( 'load', function(){
+    $( '.weevisor-content-desktop .weevisor-images img').on( 'load', function(){
 
       if (this.complete){
 
@@ -277,7 +277,7 @@ var _loadOriginalImage = function(file){
   function updateURL(){
 
     if( imageLoaded.id !== file.id ){return}
-    $('.weevisor-images img').attr('src', myImage.src)
+    $('.weevisor-content-desktop .weevisor-images img').attr('src', myImage.src)
   }
 
   myImage.src = file.formats.original.url
@@ -332,16 +332,16 @@ var _loadImage = function( file ){
 
   if( mobile ){
     //Si es mobile cargamos la preview
-    $( '.weevisor-images img').attr( 'src', file.icons[ 512 ] );
+    $( '.weevisor-content-desktop .weevisor-images img').attr( 'src', file.icons[ 512 ] );
   }else{
     if( file.dropbox ){
-      $( '.weevisor-images img').attr( 'src', 'https://download.horbito.com/dropbox/' + file.account + '/' + encodeURIComponent( file.id ) );
+      $( '.weevisor-content-desktop .weevisor-images img').attr( 'src', 'https://download.horbito.com/dropbox/' + file.account + '/' + encodeURIComponent( file.id ) );
     }else if( file.gdrive ){
-      $( '.weevisor-images img').attr( 'src', 'https://download.horbito.com/gdrive/' + file.account + '/' + encodeURIComponent( file.id ) );
+      $( '.weevisor-content-desktop .weevisor-images img').attr( 'src', 'https://download.horbito.com/gdrive/' + file.account + '/' + encodeURIComponent( file.id ) );
     }else if( file.onedrive ){
-      $( '.weevisor-images img').attr( 'src', 'https://download.horbito.com/onedrive/' + file.account + '/' + encodeURIComponent( file.id ) );
+      $( '.weevisor-content-desktop .weevisor-images img').attr( 'src', 'https://download.horbito.com/onedrive/' + file.account + '/' + encodeURIComponent( file.id ) );
     }else{
-      $( '.weevisor-images img').attr( 'src', file.icons[1024] )
+      $( '.weevisor-content-desktop .weevisor-images img').attr( 'src', file.icons[1024] )
       _loadOriginalImage(file)
     }
   }
